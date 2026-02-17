@@ -693,6 +693,10 @@ function draw() {
   }
 
   // ===== DRAW GRID CELLS =====
+  // Pulsing animation for unlocked selected cells
+  const pulseTime = Date.now() / 1000;
+  const pulseValue = Math.sin(pulseTime * 2.5) * 0.5 + 0.5; // Oscillates between 0 and 1
+  
   for (let r = 0; r < GRID_ROWS; r++) {
     for (let c = 0; c < GRID_COLS; c++) {
       const key = `${r}-${c}`;
@@ -712,11 +716,23 @@ function draw() {
         ctx.lineWidth = 1.5;
         ctx.strokeRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
       } else if (selected && !locked) {
-        ctx.fillStyle = betLocked ? 'rgba(123,97,255,0.2)' : 'rgba(123,97,255,0.32)';
-        ctx.fillRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
-        ctx.strokeStyle = 'rgba(123,97,255,0.45)';
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
+        if (betLocked) {
+          // Bet is locked but cell hasn't been hit yet - dim it
+          ctx.fillStyle = 'rgba(123,97,255,0.2)';
+          ctx.fillRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
+          ctx.strokeStyle = 'rgba(123,97,255,0.45)';
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
+        } else {
+          // Bet NOT locked - PULSE the selected cells
+          const fillAlpha = 0.25 + pulseValue * 0.15; // Pulse between 0.25 and 0.4
+          const strokeAlpha = 0.35 + pulseValue * 0.25; // Pulse between 0.35 and 0.6
+          ctx.fillStyle = `rgba(123,97,255,${fillAlpha})`;
+          ctx.fillRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
+          ctx.strokeStyle = `rgba(123,97,255,${strokeAlpha})`;
+          ctx.lineWidth = 0.5 + pulseValue * 0.5; // Pulse line width between 0.5 and 1
+          ctx.strokeRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
+        }
       } else if (selected && locked && betLocked) {
         // Locked bet cell that's been passed — dim it out
         ctx.fillStyle = 'rgba(123,97,255,0.08)';
@@ -1225,12 +1241,21 @@ function disconnectWallet() {
   updateWalletUI();
 }
 
+// ===== ANIMATION LOOP =====
+function animate() {
+  draw();
+  requestAnimationFrame(animate);
+}
+
 // ===== INIT =====
 resize(); draw(); updateBetUI();
 document.getElementById('openPrice').textContent = '$' + openPrice.toFixed(0);
 window.addEventListener('resize', () => { resize(); draw(); });
 setInterval(tick, 350);
 setInterval(timerTick, 1000);
+
+// Start continuous animation loop for smooth pulsing
+requestAnimationFrame(animate);
 
 // Wallet button event listeners
 document.getElementById('walletBtn').addEventListener('click', connectWallet);
