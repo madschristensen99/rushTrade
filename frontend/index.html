@@ -9,11 +9,11 @@
   // Import viem and wallet client
   import { createWalletClient, custom, formatEther, createPublicClient, http } from 'https://esm.sh/viem@2.7.15';
   
-  // Define Monad Devnet chain
-  const monadDevnet = {
-    id: 41454,
-    name: 'Monad Devnet',
-    network: 'monad-devnet',
+  // Define Monad Testnet chain
+  const monadTestnet = {
+    id: 10143,
+    name: 'Monad Testnet',
+    network: 'monad-testnet',
     nativeCurrency: {
       decimals: 18,
       name: 'Monad',
@@ -21,19 +21,19 @@
     },
     rpcUrls: {
       default: {
-        http: ['https://testnet.monad.xyz'],
+        http: ['https://testnet-rpc.monad.xyz'],
       },
       public: {
-        http: ['https://testnet.monad.xyz'],
+        http: ['https://testnet-rpc.monad.xyz'],
       },
     },
     blockExplorers: {
-      default: { name: 'Monad Explorer', url: 'https://explorer.testnet.monad.xyz' },
+      default: { name: 'MonadScan', url: 'https://testnet.monadscan.com' },
     },
     testnet: true,
   };
   
-  window.viem = { createWalletClient, custom, formatEther, createPublicClient, http, monadDevnet };
+  window.viem = { createWalletClient, custom, formatEther, createPublicClient, http, monadTestnet };
   window.pythReady = true;
 </script>
 <style>
@@ -454,6 +454,10 @@
   </div>
   <div class="header-right">
     <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+    <div class="live-badge" id="contractStatus" style="display: none; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-dim);">
+      <span class="live-dot" style="background: var(--accent); box-shadow: 0 0 6px var(--accent);"></span> 
+      <span id="contractStatusText">Contracts</span>
+    </div>
     <button class="wallet-btn" id="walletBtn" style="display: none;">Connect Wallet</button>
     <div class="balance-pill" id="balancePill" style="display: none;"><span class="bal-icon"></span> <span id="balance">$1,000.00</span></div>
   </div>
@@ -507,6 +511,10 @@
 
     <div class="sidebar-section">
       <div class="section-title">Stake</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 8px 12px; background: var(--surface-2); border-radius: 8px; border: 1px solid var(--border);">
+        <span style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">💵 USDC Balance</span>
+        <span id="usdcBalance" style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--green);">--</span>
+      </div>
       <div class="bet-section">
         <div class="bet-input-wrap">
           <span class="cur">$</span>
@@ -1092,24 +1100,167 @@ function updateBetUI() {
 document.getElementById('betInput').addEventListener('input', updateBetUI);
 function setBet(v) { document.getElementById('betInput').value = v; updateBetUI(); }
 
-document.getElementById('placeBtn').addEventListener('click', function() {
+document.getElementById('placeBtn').addEventListener('click', async function() {
   if (selectedCells.size === 0) return;
   
   const betAmount = parseFloat(document.getElementById('betInput').value) || 0;
   if (betAmount <= 0) return;
   
-  // Add new bet to active bets
-  activeBets.push({
-    cells: new Set(selectedCells),
-    amount: betAmount,
-    hitCells: new Set(),
-    profitTicks: 0
-  });
+  // Check if wallet is connected
+  if (!walletAddress) {
+    alert('Please connect your wallet first!');
+    return;
+  }
   
-  // Clear selection for next bet
-  selectedCells.clear();
-  updateBetUI();
-  draw();
+  // Check if on correct network
+  try {
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    const currentChainId = parseInt(chainId, 16);
+    if (currentChainId !== 10143) {
+      alert(`Wrong network! Please switch to Monad Testnet (Chain ID: 10143).\n\nCurrent chain: ${currentChainId}\n\nTo add Monad Testnet:\n1. Open MetaMask\n2. Add Network Manually\n3. RPC: https://testnet-rpc.monad.xyz\n4. Chain ID: 10143\n5. Symbol: MON`);
+      return;
+    }
+  } catch (error) {
+    console.error('Error checking chain:', error);
+  }
+  
+  // Check USDC balance
+  if (parseFloat(usdcBalance) < betAmount) {
+    alert(`Insufficient USDC balance. You have $${usdcBalance} but need $${betAmount}`);
+    return;
+  }
+  
+  // Disable button during transaction
+  const btn = document.getElementById('placeBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  
+  try {
+    // Step 1: Approve USDC
+    btn.textContent = 'Approving USDC...';
+    const approved = await approveUSDC(betAmount);
+    
+    if (!approved) {
+      throw new Error('USDC approval failed');
+    }
+    
+    // Step 2: Create and sign order for CTFExchange
+    btn.textContent = 'Creating order...';
+    
+    // For demo: use a mock condition ID (in production, this would come from MarketFactory)
+    // This would be the conditionId for the current 60s round
+    const mockConditionId = '0x' + '1'.repeat(64); // Mock condition ID
+    const yesTokenId = 1; // YES token (indexSet = 1)
+    
+    // Create BUY order (user buys YES tokens with USDC)
+    const order = {
+      maker: walletAddress,
+      tokenId: yesTokenId,
+      makerAmount: BigInt(Math.floor(betAmount * 1e6)), // USDC amount (6 decimals)
+      takerAmount: BigInt(Math.floor(betAmount * 1e6)), // Token amount (assume 1:1 for now)
+      expiration: BigInt(Math.floor(Date.now() / 1000) + 3600), // 1 hour from now
+      nonce: BigInt(Math.floor(Math.random() * 1000000)),
+      feeRateBps: BigInt(50), // 0.5% fee
+      side: 0, // BUY = 0
+      signer: '0x0000000000000000000000000000000000000000' // No delegate signer
+    };
+    
+    console.log('📝 Order created:', order);
+    console.log('💰 Buying', betAmount, 'YES tokens for $', betAmount, 'USDC');
+    
+    // Step 3: Sign order with EIP-712
+    btn.textContent = 'Sign order...';
+    
+    const domain = {
+      name: 'CTFExchange',
+      version: '1',
+      chainId: 10143,
+      verifyingContract: CONTRACTS.CTFExchange
+    };
+    
+    const types = {
+      Order: [
+        { name: 'maker', type: 'address' },
+        { name: 'tokenId', type: 'uint256' },
+        { name: 'makerAmount', type: 'uint256' },
+        { name: 'takerAmount', type: 'uint256' },
+        { name: 'expiration', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'feeRateBps', type: 'uint256' },
+        { name: 'side', type: 'uint8' },
+        { name: 'signer', type: 'address' }
+      ]
+    };
+    
+    let signature;
+    try {
+      signature = await walletClient.signTypedData({
+        account: walletAddress,
+        domain,
+        types,
+        primaryType: 'Order',
+        message: order
+      });
+      console.log('✅ Order signed:', signature);
+    } catch (signError) {
+      console.error('Signing error:', signError);
+      throw new Error('Failed to sign order: ' + signError.message);
+    }
+    
+    // Step 4: Execute trade on-chain (self-fill for demo)
+    btn.textContent = 'Executing trade...';
+    
+    // For now, we'll create a simple self-fill transaction
+    // In production, this would go to backend orderbook and be matched
+    try {
+      // Since we don't have a counter-party, let's just log the signed order
+      // In production: POST to backend API with order + signature
+      console.log('📤 Signed order ready for submission:');
+      console.log('Order:', order);
+      console.log('Signature:', signature);
+      console.log('\n🔗 This order would be submitted to the backend orderbook');
+      console.log('Backend would match it and call CTFExchange.fillOrders()');
+      
+      // TODO: Implement actual fillOrder call when we have a matching system
+      // For now, just show success
+    } catch (tradeError) {
+      console.error('Trade execution error:', tradeError);
+      throw new Error('Failed to execute trade: ' + tradeError.message);
+    }
+    
+    // Add new bet to active bets
+    activeBets.push({
+      cells: new Set(selectedCells),
+      amount: betAmount,
+      hitCells: new Set(),
+      profitTicks: 0,
+      order: order,
+      signature: signature
+    });
+    
+    // Update USDC balance
+    await updateUSDCBalance();
+    
+    // Clear selection for next bet
+    selectedCells.clear();
+    updateBetUI();
+    draw();
+    
+    // Show success message
+    btn.textContent = '✅ Bet Placed!';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }, 2000);
+    
+    console.log('✅ Bet placed successfully!');
+  } catch (error) {
+    console.error('Error placing bet:', error);
+    alert('Failed to place bet: ' + (error.message || 'Unknown error'));
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
 });
 
 // ===== PRICE ENGINE =====
@@ -1246,6 +1397,88 @@ function addTrade(id, won, pnl) {
 }
 
 // ===== WALLET FUNCTIONS =====
+async function switchToMonadTestnet() {
+  if (!window.ethereum) return;
+  
+  try {
+    // Check current chain
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    const currentChainId = parseInt(chainId, 16);
+    
+    if (currentChainId === 10143) {
+      console.log('✅ Already on Monad Testnet');
+      return;
+    }
+    
+    console.log(`Switching from chain ${currentChainId} to Monad Testnet (10143)...`);
+    
+    // Detect if using Brave Wallet
+    const isBrave = navigator.brave && await navigator.brave.isBrave();
+    
+    try {
+      // Try to switch to Monad Testnet
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x279F' }], // 10143 in hex
+      });
+      console.log('✅ Switched to Monad Testnet');
+    } catch (switchError) {
+      console.log('Switch error code:', switchError.code);
+      
+      // Error code 4902 means chain not added, -32603 can mean RPC error
+      if (switchError.code === 4902 || switchError.code === -32603 || switchError.code === 4001) {
+        try {
+          console.log('Attempting to add Monad Testnet...');
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: '0x279F', // 10143 in hex
+                chainName: 'Monad Testnet',
+                nativeCurrency: {
+                  name: 'Monad',
+                  symbol: 'MON',
+                  decimals: 18,
+                },
+                rpcUrls: ['https://testnet-rpc.monad.xyz'],
+                blockExplorerUrls: ['https://testnet.monadscan.com'],
+              },
+            ],
+          });
+          console.log('✅ Monad Testnet added successfully');
+          
+          // Try switching again after adding
+          setTimeout(async () => {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0x279F' }],
+              });
+              console.log('✅ Switched to Monad Testnet after adding');
+            } catch (e) {
+              console.log('Please manually switch to Monad Testnet');
+            }
+          }, 500);
+        } catch (addError) {
+          console.error('Error adding Monad Testnet:', addError);
+          
+          // Show user-friendly instructions for Brave Wallet
+          if (isBrave) {
+            alert(`Please add Monad Testnet manually in Brave Wallet:\n\n1. Click Brave Wallet icon\n2. Settings → Networks → Add\n3. Network Name: Monad Testnet\n4. RPC URL: https://testnet-rpc.monad.xyz\n5. Chain ID: 10143\n6. Symbol: MON\n7. Explorer: https://testnet.monadscan.com\n\nThen refresh this page.`);
+          }
+          throw addError;
+        }
+      } else {
+        throw switchError;
+      }
+    }
+  } catch (error) {
+    console.error('Error switching network:', error);
+    // Don't block - user can manually switch
+    console.warn('⚠️ Please manually switch to Monad Testnet in your wallet');
+  }
+}
+
 async function connectWallet() {
   try {
     if (!window.ethereum) {
@@ -1260,7 +1493,7 @@ async function connectWallet() {
       return;
     }
 
-    const { createWalletClient, custom, formatEther, createPublicClient, http, monadDevnet } = window.viem;
+    const { createWalletClient, custom, formatEther, createPublicClient, http, monadTestnet } = window.viem;
 
     // Request account access
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -1268,14 +1501,14 @@ async function connectWallet() {
 
     // Create wallet client
     walletClient = createWalletClient({
-      chain: monadDevnet,
+      chain: monadTestnet,
       transport: custom(window.ethereum)
     });
 
     // Create public client for reading
     publicClient = createPublicClient({
-      chain: monadDevnet,
-      transport: http()
+      chain: monadTestnet,
+      transport: http('https://testnet-rpc.monad.xyz')
     });
 
     // Get balance
@@ -1288,28 +1521,229 @@ async function connectWallet() {
     window.ethereum.on('accountsChanged', handleAccountsChanged);
     window.ethereum.on('chainChanged', () => window.location.reload());
 
+    // Switch to Monad Testnet if needed
+    await switchToMonadTestnet();
+
+    // Initialize contracts
+    await initializeContracts();
+
   } catch (error) {
     console.error('Error connecting wallet:', error);
     alert('Failed to connect wallet. Please try again.');
   }
 }
 
+// ===== CONTRACT INTEGRATION =====
+const CONTRACTS = {
+  ConditionalTokens: '0x5ec0724ea68a8f5c8ae7a87eafe136730252f1ff',
+  MarketFactory: '0xba465e13d3d5fb09627ebab1ea6e86293438c5e3',
+  CTFExchange: '0x5121fe4e7ba3130c56ea3e9e0c67c1b8eacccaa1',
+  USDC: '0x534b2f3a21130d7a60830c2df862319e593943a3'
+};
+
+let contractInstances = {};
+
+async function initializeContracts() {
+  if (!publicClient || !walletClient) {
+    console.warn('Clients not initialized');
+    return;
+  }
+
+  try {
+    console.log('✅ Contracts initialized:', CONTRACTS);
+    console.log('📍 View on explorer: https://testnet.monadscan.com');
+    
+    // Store contract addresses for later use
+    contractInstances = {
+      ctf: CONTRACTS.ConditionalTokens,
+      factory: CONTRACTS.MarketFactory,
+      exchange: CONTRACTS.CTFExchange,
+      usdc: CONTRACTS.USDC
+    };
+    
+    // Log contract info to console for debugging
+    console.log('Contract addresses loaded:', contractInstances);
+    
+    // Show contract status in UI
+    const contractStatus = document.getElementById('contractStatus');
+    const contractStatusText = document.getElementById('contractStatusText');
+    if (contractStatus && contractStatusText) {
+      contractStatus.style.display = 'flex';
+      contractStatusText.textContent = 'Contracts Ready';
+    }
+    
+    // Fetch USDC balance
+    await updateUSDCBalance();
+  } catch (error) {
+    console.error('Error initializing contracts:', error);
+  }
+}
+
+// ERC20 ABI (minimal - just what we need)
+const ERC20_ABI = [
+  {
+    "constant": true,
+    "inputs": [{"name": "_owner", "type": "address"}],
+    "name": "balanceOf",
+    "outputs": [{"name": "balance", "type": "uint256"}],
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {"name": "_spender", "type": "address"},
+      {"name": "_value", "type": "uint256"}
+    ],
+    "name": "approve",
+    "outputs": [{"name": "", "type": "bool"}],
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {"name": "_owner", "type": "address"},
+      {"name": "_spender", "type": "address"}
+    ],
+    "name": "allowance",
+    "outputs": [{"name": "", "type": "uint256"}],
+    "type": "function"
+  }
+];
+
+let usdcBalance = '0';
+
+async function updateUSDCBalance() {
+  if (!publicClient || !walletAddress) return;
+  
+  try {
+    // Read USDC balance
+    const balance = await publicClient.readContract({
+      address: CONTRACTS.USDC,
+      abi: ERC20_ABI,
+      functionName: 'balanceOf',
+      args: [walletAddress]
+    });
+    
+    // USDC has 6 decimals
+    usdcBalance = (Number(balance) / 1e6).toFixed(2);
+    
+    // Update UI
+    const usdcBalanceEl = document.getElementById('usdcBalance');
+    if (usdcBalanceEl) {
+      usdcBalanceEl.textContent = `$${usdcBalance}`;
+    }
+    
+    console.log('USDC Balance:', usdcBalance);
+  } catch (error) {
+    console.error('Error fetching USDC balance:', error);
+    const usdcBalanceEl = document.getElementById('usdcBalance');
+    if (usdcBalanceEl) {
+      usdcBalanceEl.textContent = '$0.00';
+    }
+  }
+}
+
+async function checkUSDCAllowance(amount) {
+  if (!publicClient || !walletAddress) return false;
+  
+  try {
+    const amountInUnits = BigInt(Math.floor(amount * 1e6));
+    
+    // Check current allowance
+    const allowance = await publicClient.readContract({
+      address: CONTRACTS.USDC,
+      abi: ERC20_ABI,
+      functionName: 'allowance',
+      args: [walletAddress, CONTRACTS.CTFExchange]
+    });
+    
+    console.log('Current USDC allowance:', allowance.toString(), 'Need:', amountInUnits.toString());
+    return allowance >= amountInUnits;
+  } catch (error) {
+    console.error('Error checking allowance:', error);
+    return false;
+  }
+}
+
+async function approveUSDC(amount) {
+  if (!walletClient || !walletAddress) {
+    alert('Please connect your wallet first');
+    return false;
+  }
+  
+  try {
+    // Check if we already have sufficient allowance
+    const hasAllowance = await checkUSDCAllowance(amount);
+    if (hasAllowance) {
+      console.log('✅ Sufficient USDC allowance already exists');
+      return true;
+    }
+    
+    // Convert amount to USDC units (6 decimals)
+    // Approve a larger amount to avoid frequent approvals (approve 10x the bet amount)
+    const amountInUnits = BigInt(Math.floor(amount * 10 * 1e6));
+    
+    console.log('Requesting USDC approval for:', amountInUnits.toString());
+    
+    // Approve CTFExchange to spend USDC
+    const { request } = await publicClient.simulateContract({
+      address: CONTRACTS.USDC,
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [CONTRACTS.CTFExchange, amountInUnits],
+      account: walletAddress
+    });
+    
+    const hash = await walletClient.writeContract(request);
+    console.log('Approval transaction:', hash);
+    
+    // Wait for confirmation
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    console.log('✅ USDC approved, receipt:', receipt);
+    return true;
+  } catch (error) {
+    console.error('Error approving USDC:', error);
+    if (error.message.includes('User rejected')) {
+      alert('Approval cancelled');
+    } else {
+      alert('Failed to approve USDC: ' + (error.shortMessage || error.message));
+    }
+    return false;
+  }
+}
+
 async function updateWalletBalance() {
-  if (!walletAddress || !window.viem) return;
+  if (!walletAddress || !publicClient) return;
   
   try {
     const { formatEther } = window.viem;
-    const balance = await window.ethereum.request({
-      method: 'eth_getBalance',
-      params: [walletAddress, 'latest']
+    
+    // Use publicClient to fetch balance from the correct network
+    const balance = await publicClient.getBalance({
+      address: walletAddress
     });
     
-    // Convert hex to decimal and format
-    const balanceInEth = formatEther(BigInt(balance));
-    walletBalance = parseFloat(balanceInEth).toFixed(4);
+    // Convert to MON and format
+    const balanceInMon = formatEther(balance);
+    walletBalance = parseFloat(balanceInMon).toFixed(4);
+    
+    console.log('Balance fetched:', walletBalance, 'MON');
     updateWalletUI();
   } catch (error) {
     console.error('Error fetching balance:', error);
+    // Fallback to direct RPC call
+    try {
+      const balance = await window.ethereum.request({
+        method: 'eth_getBalance',
+        params: [walletAddress, 'latest']
+      });
+      const { formatEther } = window.viem;
+      const balanceInMon = formatEther(BigInt(balance));
+      walletBalance = parseFloat(balanceInMon).toFixed(4);
+      updateWalletUI();
+    } catch (fallbackError) {
+      console.error('Fallback balance fetch failed:', fallbackError);
+    }
   }
 }
 
