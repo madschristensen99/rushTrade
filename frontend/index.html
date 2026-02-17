@@ -1148,10 +1148,9 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
     // Step 2: Create and sign order for CTFExchange
     btn.textContent = 'Creating order...';
     
-    // For demo: use a mock condition ID (in production, this would come from MarketFactory)
-    // This would be the conditionId for the current 60s round
-    const mockConditionId = '0x' + '1'.repeat(64); // Mock condition ID
-    const yesTokenId = 1; // YES token (indexSet = 1)
+    // Use the real test market condition ID
+    const conditionId = '0x2222222222222222222222222222222222222222222222222222222222222222';
+    const yesTokenId = 1; // YES token
     
     // Create BUY order (user buys YES tokens with USDC)
     const order = {
@@ -1214,7 +1213,7 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
     try {
       // Submit signed order to backend CLOB
       const orderPayload = {
-        condition_id: mockConditionId,
+        condition_id: conditionId,
         token_id: order.tokenId.toString(),
         side: order.side === 0 ? 'buy' : 'sell',  // lowercase to match backend schema
         maker_address: order.maker,

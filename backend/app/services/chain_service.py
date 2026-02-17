@@ -645,6 +645,92 @@ class ChainService:
         logger.info("resolveMarket tx %s conditionId %s", tx_hash.hex(), condition_id_hex)
         return tx_hash.hex()
 
+    async def fill_orders(
+        self,
+        orders: list[ChainOrder],
+        fill_amounts: list[int],
+        signatures: list[str]
+    ) -> str:
+        """
+        Call CTFExchange.fillOrders() to execute matched orders on-chain.
+        
+        Args:
+            orders: List of ChainOrder objects to fill
+            fill_amounts: Amount of tokens to fill for each order
+            signatures: EIP-712 signatures for each order
+            
+        Returns:
+            Transaction hash as hex string
+        """
+        if not self._operator:
+            raise RuntimeError("Operator private key not configured")
+        
+        if len(orders) != len(fill_amounts) or len(orders) != len(signatures):
+            raise ValueError("orders, fill_amounts, and signatures must have same length")
+        
+        logger.info(f"Filling {len(orders)} orders on-chain...")
+        
+        # Convert ChainOrder objects to tuples for contract call
+        order_tuples = [
+            (
+                AsyncWeb3.to_checksum_address(order.maker),
+                order.token_id,
+                order.maker_amount,
+                order.taker_amount,
+                order.expiration,
+                order.nonce,
+                order.fee_rate_bps,
+                int(order.side),
+                AsyncWeb3.to_checksum_address(order.signer)
+            )
+            for order in orders
+        ]
+        
+        # Convert signatures to bytes
+        sig_bytes = [bytes.fromhex(sig.lstrip("0x")) for sig in signatures]
+        
+        # Build transaction
+        nonce = await self.w3.eth.get_transaction_count(self._operator.address)
+        gas_price = await self.w3.eth.gas_price
+        
+        tx = await self.exchange.functions.fillOrders(
+            order_tuples,
+            fill_amounts,
+            sig_bytes
+        ).build_transaction(
+            {
+                "from": self._operator.address,
+                "nonce": nonce,
+                "gasPrice": gas_price,
+                "chainId": settings.MONAD_CHAIN_ID,
+            }
+        )
+        
+        # Estimate gas
+        try:
+            tx["gas"] = await self.w3.eth.estimate_gas(tx)
+        except Exception as e:
+            logger.error(f"Gas estimation failed: {e}")
+            # Use a default gas limit if estimation fails
+            tx["gas"] = 500000
+        
+        # Sign and send
+        signed = self._operator.sign_transaction(tx)
+        tx_hash = await self.w3.eth.send_raw_transaction(signed.raw_transaction)
+        
+        logger.info(f"fillOrders tx sent: {tx_hash.hex()}")
+        
+        # Wait for receipt
+        receipt = await self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        if receipt["status"] == 1:
+            logger.info(f"✅ fillOrders successful: {tx_hash.hex()}")
+        else:
+            logger.error(f"❌ fillOrders failed: {tx_hash.hex()}")
+            raise RuntimeError(f"Transaction failed: {tx_hash.hex()}")
+        
+        return tx_hash.hex()
+
     # -----------------------------------------------------------------------
     # EIP-712 helpers (off-chain)
     # -----------------------------------------------------------------------

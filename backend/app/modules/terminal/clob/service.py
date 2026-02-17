@@ -140,11 +140,26 @@ async def submit_order(
     matches: list[MatchResult] = await match_new_order(db, order)
 
     # Apply matches.
+    fill_ids = []
     for match in matches:
-        await _apply_match(db, order, match, payload.signature)
+        fill = await _apply_match(db, order, match, payload.signature)
+        if fill:
+            fill_ids.append(fill.id)
 
     await db.commit()
     await db.refresh(order)
+
+    # Trigger settlement for matched fills
+    if fill_ids:
+        logger.info(f"✅ Created {len(fill_ids)} fills, triggering settlement...")
+        # Import here to avoid circular dependency
+        try:
+            from app.tasks.settlement_tasks import settle_fills
+            # Trigger async settlement (non-blocking)
+            settle_fills.delay()
+        except Exception as e:
+            logger.warning(f"Could not trigger settlement task: {e}")
+            logger.info("Run settlement manually with: python3 trigger_settlement.py")
 
     return _order_to_response(order)
 
@@ -154,8 +169,8 @@ async def _apply_match(
     taker_order: Order,
     match: MatchResult,
     taker_signature: str,
-) -> None:
-    """Persist a Fill record and update order statuses."""
+) -> Fill:
+    """Persist a Fill record and update order statuses. Returns the created Fill."""
     fill = Fill(
         maker_order_id=match.maker_order_id,
         taker_order_id=taker_order.id,
@@ -167,6 +182,7 @@ async def _apply_match(
         status=FillStatus.PENDING,
     )
     db.add(fill)
+    await db.flush()  # Get fill.id
 
     # Update maker order.
     maker_order = (
@@ -192,6 +208,8 @@ async def _apply_match(
         match.token_amount,
         match.collateral_amount,
     )
+    
+    return fill
 
 
 # ---------------------------------------------------------------------------
