@@ -5,6 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PULSE — 60s Prediction Markets</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script type="module">
+  // Import viem and wallet client
+  import { createWalletClient, custom, formatEther, createPublicClient, http } from 'https://esm.sh/viem@2.7.15';
+  
+  // Define Monad Devnet chain
+  const monadDevnet = {
+    id: 41454,
+    name: 'Monad Devnet',
+    network: 'monad-devnet',
+    nativeCurrency: {
+      decimals: 18,
+      name: 'Monad',
+      symbol: 'MON',
+    },
+    rpcUrls: {
+      default: {
+        http: ['https://testnet.monad.xyz'],
+      },
+      public: {
+        http: ['https://testnet.monad.xyz'],
+      },
+    },
+    blockExplorers: {
+      default: { name: 'Monad Explorer', url: 'https://explorer.testnet.monad.xyz' },
+    },
+    testnet: true,
+  };
+  
+  window.viem = { createWalletClient, custom, formatEther, createPublicClient, http, monadDevnet };
+</script>
 <style>
   :root {
     --bg: #06070b;
@@ -118,11 +148,32 @@
 
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+  .wallet-btn {
+    padding: 8px 18px; background: linear-gradient(135deg, var(--accent), #9b7dff);
+    border: none; border-radius: 8px; color: #fff;
+    font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(123, 97, 255, 0.3);
+  }
+  
+  .wallet-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 25px rgba(123, 97, 255, 0.5);
+  }
+  
+  .wallet-btn:active { transform: translateY(0); }
+
   .balance-pill {
     display: flex; align-items: center; gap: 7px;
     padding: 6px 14px; background: var(--surface-2);
     border: 1px solid var(--border); border-radius: 8px;
     font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  
+  .balance-pill:hover {
+    background: var(--surface);
+    border-color: var(--accent);
   }
 
   .bal-icon {
@@ -380,7 +431,8 @@
   </div>
   <div class="header-right">
     <div class="live-badge"><span class="live-dot"></span> LIVE</div>
-    <div class="balance-pill"><span class="bal-icon"></span> <span id="balance">$1,000.00</span></div>
+    <button class="wallet-btn" id="walletBtn" style="display: none;">Connect Wallet</button>
+    <div class="balance-pill" id="balancePill" style="display: none;"><span class="bal-icon"></span> <span id="balance">$1,000.00</span></div>
   </div>
 </div>
 
@@ -480,12 +532,18 @@ const BUFFER_SECONDS = 3; // 3-second no-bet buffer
 // Each grid column spans this many seconds
 const SECS_PER_COL = 60 / GRID_COLS; // 5s per column
 
+// ===== WALLET STATE =====
+let walletClient = null;
+let publicClient = null;
+let walletAddress = null;
+let walletBalance = null;
+
 // ===== STATE =====
 let basePrice = 97241.38;
 let currentPrice = basePrice;
 let openPrice = basePrice;
 let priceHistory = [];
-let timeLeft = 60;
+let timeLeft = 57; // Match the 3-second offset
 let roundNum = 12848;
 let balanceVal = 1000;
 let selectedCells = new Set();
@@ -494,15 +552,16 @@ let toolMode = 'paint';
 let betLocked = false;
 let lockedCells = new Set();
 let lockedBet = 0;
+let hitCells = new Set(); // Track cells that have been successfully hit
 let inProfit = false;
 let prevInProfit = false;
 let profitTicks = 0;
 let gridPriceHigh, gridPriceLow;
+// Start 3 seconds into the round for better initial appearance
+let roundStartTime = Date.now() - 3000;
 
-for (let i = 0; i < 150; i++) {
-  basePrice += (Math.random() - 0.498) * 14;
-  priceHistory.push(basePrice);
-}
+// Start with just current price, no history
+priceHistory.push(basePrice);
 currentPrice = priceHistory[priceHistory.length - 1];
 openPrice = currentPrice;
 gridPriceHigh = currentPrice + 300;
@@ -564,10 +623,11 @@ function draw() {
   const priceRange = gridPriceHigh - gridPriceLow;
   const toY = v => CHART_PAD_TOP + (1 - (v - gridPriceLow) / priceRange) * chartH;
 
-  // Current position on grid
-  const elapsed = 60 - timeLeft;
+  // Current position on grid with sub-second precision
+  const elapsedMs = Date.now() - roundStartTime;
+  const elapsedSec = Math.min(60, elapsedMs / 1000);
   // Fractional column for smooth cursor (based on elapsed + sub-second from price ticks)
-  const tColFrac = elapsed / SECS_PER_COL;
+  const tColFrac = elapsedSec / SECS_PER_COL;
   const tColC = Math.max(0, Math.min(GRID_COLS - 1, Math.floor(tColFrac)));
   const pRow = Math.floor((1 - (currentPrice - gridPriceLow) / priceRange) * GRID_ROWS);
   const pRowC = Math.max(0, Math.min(GRID_ROWS - 1, pRow));
@@ -642,8 +702,10 @@ function draw() {
       const locked = isCellLocked(c);
       const isCursor = (r === pRowC && c === tColC);
       const isHit = selected && isCursor && betLocked;
+      const wasHit = hitCells.has(key); // Check if this cell was previously hit
 
-      if (isHit) {
+      if (isHit || wasHit) {
+        // Cell is currently being hit OR was hit before - keep it green
         ctx.fillStyle = 'rgba(0, 232, 123, 0.4)';
         ctx.fillRect(x + 0.5, y + 0.5, cellW - 1, cellH - 1);
         ctx.strokeStyle = '#00e87b';
@@ -732,8 +794,8 @@ function draw() {
 
   // ===== PRICE CURSOR ON GRID =====
   const priceY = toY(currentPrice);
-  const timeX = gridStartX + tColFrac * cellW;
-  const timeXSnapped = gridStartX + tColC * cellW + cellW / 2;
+  // Blue dot position aligned with grid cells
+  const timeXSnapped = gridStartX + (tColC + 0.5) * cellW;
 
   // Crosshairs
   ctx.setLineDash([5,3]);
@@ -807,7 +869,11 @@ function draw() {
     document.getElementById('profitFlash').classList.add('active');
     setTimeout(() => document.getElementById('profitFlash').classList.remove('active'), 500);
   }
-  if (nowInProfit) profitTicks++;
+  if (nowInProfit) {
+    profitTicks++;
+    // Track this cell as a hit so it stays green
+    hitCells.add(cursorKey);
+  }
   inProfit = nowInProfit;
   prevInProfit = nowInProfit;
 
@@ -1020,12 +1086,16 @@ function resolveRound() {
     document.getElementById('balance').textContent = '$' + balanceVal.toFixed(2);
   }
 
-  betLocked = false; lockedCells.clear(); selectedCells.clear();
+  betLocked = false; lockedCells.clear(); selectedCells.clear(); hitCells.clear();
   inProfit = false; prevInProfit = false; profitTicks = 0;
   roundNum++; timeLeft = 60;
+  roundStartTime = Date.now();
   openPrice = currentPrice;
   gridPriceHigh = currentPrice + 300;
   gridPriceLow = currentPrice - 300;
+  
+  // Clear price history to sync with new round, keep last 2 points for continuity
+  priceHistory = priceHistory.slice(-2);
 
   document.getElementById('roundNumber').textContent = '#' + roundNum.toLocaleString();
   document.getElementById('roundStatus').textContent = 'Accepting bets';
@@ -1044,12 +1114,130 @@ function addTrade(id, won, pnl) {
   if (c.children.length > 8) c.removeChild(c.lastChild);
 }
 
+// ===== WALLET FUNCTIONS =====
+async function connectWallet() {
+  try {
+    if (!window.ethereum) {
+      alert('Please install MetaMask to use this app!');
+      return;
+    }
+
+    // Wait for viem to load
+    if (!window.viem) {
+      console.log('Waiting for viem to load...');
+      setTimeout(connectWallet, 100);
+      return;
+    }
+
+    const { createWalletClient, custom, formatEther, createPublicClient, http, monadDevnet } = window.viem;
+
+    // Request account access
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    walletAddress = accounts[0];
+
+    // Create wallet client
+    walletClient = createWalletClient({
+      chain: monadDevnet,
+      transport: custom(window.ethereum)
+    });
+
+    // Create public client for reading
+    publicClient = createPublicClient({
+      chain: monadDevnet,
+      transport: http()
+    });
+
+    // Get balance
+    await updateWalletBalance();
+
+    // Update UI
+    updateWalletUI();
+
+    // Listen for account changes
+    window.ethereum.on('accountsChanged', handleAccountsChanged);
+    window.ethereum.on('chainChanged', () => window.location.reload());
+
+  } catch (error) {
+    console.error('Error connecting wallet:', error);
+    alert('Failed to connect wallet. Please try again.');
+  }
+}
+
+async function updateWalletBalance() {
+  if (!walletAddress || !window.viem) return;
+  
+  try {
+    const { formatEther } = window.viem;
+    const balance = await window.ethereum.request({
+      method: 'eth_getBalance',
+      params: [walletAddress, 'latest']
+    });
+    
+    // Convert hex to decimal and format
+    const balanceInEth = formatEther(BigInt(balance));
+    walletBalance = parseFloat(balanceInEth).toFixed(4);
+    updateWalletUI();
+  } catch (error) {
+    console.error('Error fetching balance:', error);
+  }
+}
+
+function updateWalletUI() {
+  const walletBtn = document.getElementById('walletBtn');
+  const balancePill = document.getElementById('balancePill');
+  const balanceText = document.getElementById('balance');
+
+  if (walletAddress) {
+    // Show balance pill, hide connect button
+    walletBtn.style.display = 'none';
+    balancePill.style.display = 'flex';
+    
+    // Format address: 0x1234...5678
+    const shortAddress = `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+    balanceText.textContent = `${shortAddress} • ${walletBalance || '0.0000'} MON`;
+  } else {
+    // Show connect button, hide balance pill
+    walletBtn.style.display = 'block';
+    balancePill.style.display = 'none';
+  }
+}
+
+function handleAccountsChanged(accounts) {
+  if (accounts.length === 0) {
+    // User disconnected wallet
+    walletAddress = null;
+    walletBalance = null;
+    walletClient = null;
+    publicClient = null;
+    updateWalletUI();
+  } else {
+    // User switched accounts
+    walletAddress = accounts[0];
+    updateWalletBalance();
+  }
+}
+
+function disconnectWallet() {
+  walletAddress = null;
+  walletBalance = null;
+  walletClient = null;
+  publicClient = null;
+  updateWalletUI();
+}
+
 // ===== INIT =====
 resize(); draw(); updateBetUI();
 document.getElementById('openPrice').textContent = '$' + openPrice.toFixed(0);
 window.addEventListener('resize', () => { resize(); draw(); });
 setInterval(tick, 350);
 setInterval(timerTick, 1000);
+
+// Wallet button event listeners
+document.getElementById('walletBtn').addEventListener('click', connectWallet);
+document.getElementById('balancePill').addEventListener('click', disconnectWallet);
+
+// Show connect button on load
+updateWalletUI();
 </script>
 </body>
 </html>
