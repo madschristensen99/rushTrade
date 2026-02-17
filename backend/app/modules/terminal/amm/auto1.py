@@ -9,8 +9,8 @@ import time
 import asyncio
 from typing import Optional, Dict
 from dotenv import load_dotenv
-from app.modules.terminal.auto.kalshi_api import Config, MarketState
-from app.modules.terminal.auto.mm_core import BaseMarketMaker
+from app.modules.terminal.amm.kalshi_api import Config, MarketState
+from app.modules.terminal.amm.mm_core import BaseMarketMaker
 
 load_dotenv()
 
