@@ -35,7 +35,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_current_user, get_db
+from app.dependencies import get_db
 from app.modules.terminal.clob import service
 from app.modules.terminal.clob.schema import (
     BtcRoundResponse,
@@ -48,7 +48,6 @@ from app.modules.terminal.clob.schema import (
     PositionsResponse,
     StrikeMarketResponse,
 )
-from app.modules.user.models import User
 from app.services.chain_service import chain
 
 router = APIRouter()
@@ -111,14 +110,11 @@ async def get_orderbook(
 async def sync_market(
     condition_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     """
-    Admin: pull the latest market data from the MarketFactory contract and
+    Pull the latest market data from the MarketFactory contract and
     upsert it into the database.  Used when a new market is created on-chain.
     """
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=403, detail="Admin only")
     try:
         return await service.sync_market_from_chain(db, condition_id)
     except Exception as exc:
@@ -168,31 +164,31 @@ async def submit_order(
         await db.flush()
     
     try:
-        return await service.submit_order(db, payload, current_user)
+        return await service.submit_order(db, payload)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.get("/orders", response_model=list[OrderResponse], tags=["CLOB – Orders"])
 async def list_orders(
+    maker_address: Optional[str] = Query(None, description="Filter by maker wallet address"),
     status: Optional[str] = Query(None, description="Filter: open, partial, filled, cancelled, expired"),
     condition_id: Optional[str] = Query(None, description="Filter by market condition ID"),
     offset: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    """Return the authenticated user's order history."""
+    """Return order history, optionally filtered by maker wallet address."""
     return await service.get_user_orders(
-        db, current_user, status=status, condition_id=condition_id, offset=offset, limit=limit
+        db, maker_address=maker_address, status=status, condition_id=condition_id, offset=offset, limit=limit
     )
 
 
 @router.delete("/orders/{order_id}", response_model=OrderResponse, tags=["CLOB – Orders"])
 async def cancel_order(
     order_id: int,
+    maker_address: str = Query(..., description="Wallet address that submitted the order"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     """
     Cancel an open or partially filled order.
@@ -201,7 +197,7 @@ async def cancel_order(
     CTFExchange contract so the signature can no longer be used to fill on-chain.
     """
     try:
-        return await service.cancel_order(db, order_id, current_user)
+        return await service.cancel_order(db, order_id, maker_address)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
@@ -214,7 +210,6 @@ async def cancel_order(
 async def get_positions(
     wallet: str,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     """
     Return the on-chain conditional token balances for a wallet across all active markets.
@@ -235,13 +230,13 @@ async def get_positions(
 
 @router.get("/fills", response_model=list[FillResponse], tags=["CLOB – Fills"])
 async def list_fills(
+    wallet: Optional[str] = Query(None, description="Filter fills by maker or taker wallet address"),
     offset: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    """Return fill history for the authenticated user."""
-    return await service.get_user_fills(db, current_user, offset=offset, limit=limit)
+    """Return fill history, optionally filtered by wallet address."""
+    return await service.get_user_fills(db, wallet=wallet, offset=offset, limit=limit)
 
 
 # ---------------------------------------------------------------------------

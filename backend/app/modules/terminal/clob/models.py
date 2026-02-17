@@ -11,6 +11,7 @@ Fill    – record of each order fill (pending on-chain settlement → settled)
 from __future__ import annotations
 
 from enum import Enum
+from typing import Optional
 
 from sqlalchemy import (
     BigInteger,
@@ -158,7 +159,7 @@ class Order(Base, TimestampMixin):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    user_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id"), nullable=True, index=True)
 
     # Market linkage
     condition_id: Mapped[str] = mapped_column(String(66), nullable=False, index=True)

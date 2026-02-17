@@ -49,7 +49,6 @@ from app.modules.terminal.clob.schema import (
     PositionItem,
     PositionsResponse,
 )
-from app.modules.user.models import User
 from app.services.chain_service import ChainOrder, OrderSide as ChainOrderSide, chain
 from app.config import get_settings
 
@@ -64,7 +63,6 @@ settings = get_settings()
 async def submit_order(
     db: AsyncSession,
     payload: OrderCreate,
-    current_user: User,
 ) -> OrderResponse:
     """
     Validate and persist a new signed order, then run matching.
@@ -119,7 +117,7 @@ async def submit_order(
 
     # Persist the order.
     order = Order(
-        user_id=current_user.id,
+        user_id=None,
         condition_id=payload.condition_id,
         token_id=payload.token_id,
         maker_address=payload.maker_address,
@@ -203,12 +201,12 @@ async def _apply_match(
 async def cancel_order(
     db: AsyncSession,
     order_id: int,
-    current_user: User,
+    maker_address: str,
 ) -> OrderResponse:
     """Cancel an open or partially filled order."""
     order = (
         await db.execute(
-            select(Order).where(and_(Order.id == order_id, Order.user_id == current_user.id))
+            select(Order).where(and_(Order.id == order_id, Order.maker_address == maker_address))
         )
     ).scalar_one_or_none()
 
@@ -381,13 +379,15 @@ async def get_positions(db: AsyncSession, wallet: str) -> PositionsResponse:
 
 async def get_user_orders(
     db: AsyncSession,
-    current_user: User,
+    maker_address: Optional[str] = None,
     status: Optional[str] = None,
     condition_id: Optional[str] = None,
     offset: int = 0,
     limit: int = 50,
 ) -> list[OrderResponse]:
-    query = select(Order).where(Order.user_id == current_user.id)
+    query = select(Order)
+    if maker_address:
+        query = query.where(Order.maker_address == maker_address)
     if status:
         query = query.where(Order.status == status)
     if condition_id:
@@ -399,21 +399,11 @@ async def get_user_orders(
 
 async def get_user_fills(
     db: AsyncSession,
-    current_user: User,
+    wallet: Optional[str] = None,
     offset: int = 0,
     limit: int = 50,
 ) -> list[FillResponse]:
-    """Return fills where the user is maker or taker."""
-    wallet = None
-    orders_q = await db.execute(
-        select(Order.maker_address)
-        .where(Order.user_id == current_user.id)
-        .limit(1)
-    )
-    row = orders_q.scalar_one_or_none()
-    if row:
-        wallet = row
-
+    """Return fills where the wallet is maker or taker."""
     query = select(Fill)
     if wallet:
         from sqlalchemy import or_
