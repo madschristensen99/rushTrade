@@ -1,0 +1,55 @@
+2026-02-10 19:31:24 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: TypeError: an integer is required
+2026-02-10 19:34:22 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: gaierror: [Errno -3] Temporary failure in name resolution
+2026-02-10 21:35:54 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 21:35:54 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 23:15:57 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 23:15:58 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 23:22:04 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 23:22:04 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 23:49:56 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 23:49:57 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InvalidTextRepresentationError'>: invalid input value for enum instancestatus: "DEAD"
+[SQL: SELECT trading_instances.id, trading_instances.user_id, trading_instances.script, trading_instances.markets, trading_instances.config, trading_instances.status, trading_instances.position, trading_instances.pnl, trading_instances.celery_task_id, trading_instances.start_time, trading_instances.orderbook_data, trading_instances.current_increment, trading_instances.created_at, trading_instances.updated_at 
+FROM trading_instances 
+WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2::instancestatus ORDER BY trading_instances.created_at DESC]
+[parameters: (2, 'DEAD')]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+2026-02-10 23:54:21 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
+2026-02-10 23:54:21 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
+2026-02-11 00:30:55 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
+2026-02-11 00:30:55 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
+2026-02-11 15:45:32 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
