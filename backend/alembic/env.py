@@ -20,7 +20,11 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from app.database.base import Base
 from app.modules.user.models import User
-from app.modules.terminal.auto.models import TradingInstance 
+# from app.modules.terminal.auto.models import TradingInstance  # Module doesn't exist
+try:
+    from app.modules.terminal.clob.models import Market, Order, Fill, BtcMarketRound
+except ImportError:
+    pass  # CLOB models may not exist yet
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

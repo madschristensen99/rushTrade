@@ -1216,18 +1216,20 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
       const orderPayload = {
         condition_id: mockConditionId,
         token_id: order.tokenId.toString(),
-        side: order.side === 0 ? 'BUY' : 'SELL',
+        side: order.side === 0 ? 'buy' : 'sell',  // lowercase to match backend schema
+        maker_address: order.maker,
         maker_amount: order.makerAmount.toString(),
         taker_amount: order.takerAmount.toString(),
-        expiration: order.expiration.toString(),
-        nonce: order.nonce.toString(),
-        fee_rate_bps: order.feeRateBps.toString(),
+        expiration: parseInt(order.expiration.toString()),
+        nonce: parseInt(order.nonce.toString()),
+        fee_rate_bps: parseInt(order.feeRateBps.toString()),
+        signer: order.signer,
         signature: signature
       };
       
       console.log('📤 Submitting order to backend:', orderPayload);
       
-      const response = await fetch('http://localhost:8000/api/v1/clob/orders', {
+      const response = await fetch('http://localhost:8000/api/v1/terminal/clob/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
