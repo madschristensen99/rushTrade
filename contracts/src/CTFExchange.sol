@@ -334,7 +334,7 @@ contract CTFExchange is EIP712, Ownable2Step, ReentrancyGuard {
 
         // Signature check.
         address expectedSigner = order.signer != address(0) ? order.signer : order.maker;
-        address recovered = _hashTypedDataV4(orderHash).recover(signature);
+        address recovered = orderHash.recover(signature);
         require(recovered == expectedSigner, "CTFExchange: invalid signature");
     }
 

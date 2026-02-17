@@ -23,7 +23,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base, TimestampMixin
 
@@ -55,6 +55,39 @@ class MarketStatus(str, Enum):
     ACTIVE = "active"
     RESOLVED = "resolved"
     CANCELLED = "cancelled"
+
+
+class BtcRoundStatus(str, Enum):
+    ACTIVE = "active"
+    RESOLVED = "resolved"
+    FAILED = "failed"
+
+
+# ---------------------------------------------------------------------------
+# BtcMarketRound
+# ---------------------------------------------------------------------------
+
+class BtcMarketRound(Base, TimestampMixin):
+    """
+    Represents one 60-second BTC/USD market round.
+    Each round has exactly 5 associated Market rows (one per strike price).
+    """
+    __tablename__ = "btc_market_rounds"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    # UTC minute boundaries
+    round_start: Mapped[str] = mapped_column(String(32), nullable=False, unique=True, index=True)
+    round_end: Mapped[str] = mapped_column(String(32), nullable=False)
+
+    # BTC/USD price at round open (set when round is created)
+    btc_price_at_open: Mapped[float] = mapped_column(Numeric(18, 2), nullable=False)
+    # BTC/USD price at round close (set when round is resolved)
+    btc_price_at_close: Mapped[float] = mapped_column(Numeric(18, 2), nullable=True)
+
+    status: Mapped[str] = mapped_column(
+        SQLEnum(BtcRoundStatus), default=BtcRoundStatus.ACTIVE, nullable=False
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -97,6 +130,13 @@ class Market(Base, TimestampMixin):
     no_price: Mapped[float] = mapped_column(Numeric(20, 6), default=0.5, nullable=True)
     volume_24h: Mapped[float] = mapped_column(Numeric(30, 6), default=0.0, nullable=True)
     total_volume: Mapped[float] = mapped_column(Numeric(30, 6), default=0.0, nullable=True)
+
+    # BTC strike market fields (null for non-BTC markets)
+    btc_round_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("btc_market_rounds.id"), nullable=True, index=True
+    )
+    strike_price: Mapped[float] = mapped_column(Numeric(18, 2), nullable=True)
+    strike_index: Mapped[int] = mapped_column(Integer, nullable=True)  # 0=+0.1% … 4=-0.1%
 
 
 # ---------------------------------------------------------------------------

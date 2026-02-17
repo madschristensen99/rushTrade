@@ -226,3 +226,29 @@ class FillResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ---------------------------------------------------------------------------
+# BTC Strike Markets
+# ---------------------------------------------------------------------------
+
+class StrikeMarketResponse(BaseModel):
+    """One strike market within a BTC round, including its live 5-level orderbook."""
+    condition_id: str
+    strike_price: str           # e.g. "97331.76"
+    strike_label: str           # "+0.1%", "+0.05%", "ATM", "-0.05%", "-0.1%"
+    strike_index: int           # 0 (highest) … 4 (lowest)
+    yes_token_id: Optional[str] = None
+    no_token_id: Optional[str] = None
+    orderbook: OrderbookResponse
+
+
+class BtcRoundResponse(BaseModel):
+    """The current active 60-second BTC/USD round with all 5 strike markets."""
+    round_id: int
+    round_start: str            # ISO UTC string
+    round_end: str              # ISO UTC string
+    btc_price_at_open: str      # e.g. "97234.50"
+    status: str                 # "active" | "resolved" | "failed"
+    seconds_remaining: int      # 0 when expired
+    markets: list[StrikeMarketResponse]  # ordered by strike_index (0 = highest strike)

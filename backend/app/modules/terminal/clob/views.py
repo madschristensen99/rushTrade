@@ -38,6 +38,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_current_user, get_db
 from app.modules.terminal.clob import service
 from app.modules.terminal.clob.schema import (
+    BtcRoundResponse,
     FillResponse,
     MarketListResponse,
     MarketResponse,
@@ -45,6 +46,7 @@ from app.modules.terminal.clob.schema import (
     OrderResponse,
     OrderbookResponse,
     PositionsResponse,
+    StrikeMarketResponse,
 )
 from app.modules.user.models import User
 from app.services.chain_service import chain
@@ -262,6 +264,91 @@ async def get_eip712_info(condition_id: str):
         "primaryType": "Order",
         "condition_id": condition_id,
     }
+
+
+# ---------------------------------------------------------------------------
+# BTC Strike Markets
+# ---------------------------------------------------------------------------
+
+@router.get("/btc/round/current", response_model=BtcRoundResponse, tags=["CLOB – BTC Markets"])
+async def get_current_btc_round(db: AsyncSession = Depends(get_db)):
+    """
+    Return the current active 60-second BTC/USD round.
+
+    Includes all 5 strike markets with their live 5-level orderbooks.
+    YES bids represent buyers of YES tokens.
+    NO bids (= YES asks) represent sellers of YES tokens / buyers of NO tokens.
+
+    Returns 404 if no active round exists yet.
+    """
+    from datetime import datetime, timezone
+
+    from sqlalchemy import select
+
+    from app.modules.terminal.clob.matching import get_orderbook_snapshot
+    from app.modules.terminal.clob.models import BtcMarketRound, BtcRoundStatus, Market
+    from app.services.price_oracle import STRIKE_LABELS
+
+    active_round = (
+        await db.execute(
+            select(BtcMarketRound)
+            .where(BtcMarketRound.status == BtcRoundStatus.ACTIVE)
+            .order_by(BtcMarketRound.id.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+
+    if active_round is None:
+        raise HTTPException(status_code=404, detail="No active BTC round")
+
+    markets = (
+        await db.execute(
+            select(Market)
+            .where(Market.btc_round_id == active_round.id)
+            .order_by(Market.strike_index)
+        )
+    ).scalars().all()
+
+    now = datetime.now(timezone.utc)
+    round_end_dt = datetime.fromisoformat(active_round.round_end)
+    seconds_remaining = max(0, int((round_end_dt - now).total_seconds()))
+
+    strike_markets: list[StrikeMarketResponse] = []
+    for market in markets:
+        # Build empty orderbook if token IDs aren't synced yet.
+        if market.yes_token_id and market.no_token_id:
+            ob = await service.get_orderbook(db, market.condition_id, depth=5)
+        else:
+            from app.modules.terminal.clob.schema import OrderbookSide, OrderbookResponse
+            empty_side = OrderbookSide(bids=[], asks=[])
+            ob = OrderbookResponse(
+                condition_id=market.condition_id,
+                yes=empty_side,
+                no=empty_side,
+            )
+
+        idx = market.strike_index if market.strike_index is not None else 0
+        strike_markets.append(
+            StrikeMarketResponse(
+                condition_id=market.condition_id,
+                strike_price=f"{float(market.strike_price):.2f}",
+                strike_label=STRIKE_LABELS[idx],
+                strike_index=idx,
+                yes_token_id=market.yes_token_id,
+                no_token_id=market.no_token_id,
+                orderbook=ob,
+            )
+        )
+
+    return BtcRoundResponse(
+        round_id=active_round.id,
+        round_start=active_round.round_start,
+        round_end=active_round.round_end,
+        btc_price_at_open=f"{float(active_round.btc_price_at_open):.2f}",
+        status=active_round.status,
+        seconds_remaining=seconds_remaining,
+        markets=strike_markets,
+    )
 
 
 # ---------------------------------------------------------------------------

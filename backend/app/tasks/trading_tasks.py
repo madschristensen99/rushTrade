@@ -26,6 +26,7 @@ import time
 from datetime import datetime, timezone
 
 from celery import Celery
+from celery.schedules import crontab
 
 from app.config import get_settings
 
@@ -57,6 +58,10 @@ celery.conf.update(
         "update-market-stats-every-10s": {
             "task": "trading_tasks.update_market_stats",
             "schedule": 10.0,
+        },
+        "rotate-btc-round-every-minute": {
+            "task": "btc_market_tasks.rotate_btc_round",
+            "schedule": crontab(minute="*"),
         },
     },
 )
