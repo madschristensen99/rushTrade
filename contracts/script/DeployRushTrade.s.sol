@@ -22,21 +22,13 @@ contract MockUSDC is ERC20 {
 
 contract DeployRushTrade is Script {
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         
         vm.startBroadcast(deployerPrivateKey);
 
-        // Deploy Mock USDC (or use existing USDC address)
-        address usdcAddress = vm.envOr("USDC_ADDRESS", address(0));
-        
-        if (usdcAddress == address(0)) {
-            console.log("Deploying Mock USDC...");
-            MockUSDC usdc = new MockUSDC();
-            usdcAddress = address(usdc);
-            console.log("Mock USDC deployed at:", usdcAddress);
-        } else {
-            console.log("Using existing USDC at:", usdcAddress);
-        }
+        // Use existing USDC from Monad testnet deployment
+        address usdcAddress = 0x534b2f3A21130d7a60830c2Df862319e593943A3;
+        console.log("Using existing USDC at:", usdcAddress);
 
         // Deploy RushTrade
         console.log("\nDeploying RushTrade...");

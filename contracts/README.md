@@ -2,6 +2,13 @@
 
 Simplified on-chain prediction market for 60-second BTC price movements.
 
+## 🚀 Deployed Contracts (Monad Testnet)
+
+- **RushTrade**: `0xf20d297680cd451910eaa5fc58e73824d09e4688`
+- **USDC**: `0x534b2f3A21130d7a60830c2Df862319e593943A3`
+- **Deployment TX**: [0x303c2ba...](https://testnet.monadscan.com/tx/0x303c2ba48883781c0e0e8a7cef06678d5722e897e3da8ea47eb25dc364b00049)
+- **Explorer**: https://testnet.monadscan.com/address/0xf20d297680cd451910eaa5fc58e73824d09e4688
+
 ## Architecture
 
 **Single Contract System** - No backend required, all logic on-chain.
