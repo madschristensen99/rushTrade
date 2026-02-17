@@ -1037,3 +1037,91 @@ WHERE users.username = ?]
 2026-02-17 16:45:03 | ERROR | unknown | anonymous | POST /api/v1/terminal/clob/orders | - | -ms | Unhandled exception: TypeError: Object of type ValueError is not JSON serializable
 2026-02-17 16:45:04 | WARNING | unknown | anonymous | - - | - | -ms | Validation error on /api/v1/terminal/clob/orders
 2026-02-17 16:45:04 | ERROR | unknown | anonymous | POST /api/v1/terminal/clob/orders | - | -ms | Unhandled exception: TypeError: Object of type ValueError is not JSON serializable
+2026-02-17 16:45:25 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:45:25 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:45:25 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:45:25 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:47:05 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:47:05 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:47:05 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:47:06 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:47:06 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:47:06 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:47:06 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:47:32 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:47:32 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:47:32 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:47:33 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:47:33 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:47:33 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:47:33 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:47:58 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:47:58 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:47:58 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:47:59 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:47:59 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:47:59 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:47:59 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:48:43 | ERROR | unknown | anonymous | POST /api/v1/terminal/clob/orders | - | -ms | Unhandled exception: NameError: name 'User' is not defined
+2026-02-17 16:49:39 | INFO | 3276c275-b508-4f6a-8205-4046ed395912 | anonymous | OPTIONS /api/v1/terminal/clob/orders | 200 | 1.47ms | OPTIONS /api/v1/terminal/clob/orders - 200 - 1.47ms
+2026-02-17 16:49:39 | ERROR | unknown | anonymous | POST /api/v1/terminal/clob/orders | - | -ms | Unhandled exception: NameError: name 'User' is not defined
+2026-02-17 16:50:08 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:50:08 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:50:08 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:50:09 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:50:09 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:50:09 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:50:09 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:50:27 | ERROR | unknown | anonymous | - /api/v1/terminal/clob/orders | - | -ms | Database error: (sqlite3.IntegrityError) NOT NULL constraint failed: orders.user_id
+[SQL: INSERT INTO orders (user_id, condition_id, token_id, maker_address, maker_amount, taker_amount, expiration, nonce, fee_rate_bps, side, signer, signature, order_hash, status, filled_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at, updated_at]
+[parameters: (None, '0x2222222222222222222222222222222222222222222222222222222222222222', '1', '0xda932ff69169319cfc285c3bd42dc63b018994df', '1000000', '1000000', 1771368626, 686664, 50, 'BUY', '0x0000000000000000000000000000000000000000', '0xc0c3b940a9e5ae9bdaea0a5617b0989544b014a474ebfce117fca4451313425a113b90407451aef06929a65fd2722b265380766445ae088585f110884474b5201b', '0x55d79f915304b013d79431c0f7488469c87154aa4b3f686ef9c2aa904705fcab', 'OPEN', '0')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-02-17 16:50:27 | INFO | 54e6f6b5-9c64-455f-8d36-cc32b2008059 | anonymous | POST /api/v1/terminal/clob/orders | 500 | 26.61ms | POST /api/v1/terminal/clob/orders - 500 - 26.61ms
+2026-02-17 16:52:24 | ERROR | unknown | anonymous | - /api/v1/terminal/clob/orders | - | -ms | Database error: (sqlite3.IntegrityError) NOT NULL constraint failed: orders.user_id
+[SQL: INSERT INTO orders (user_id, condition_id, token_id, maker_address, maker_amount, taker_amount, expiration, nonce, fee_rate_bps, side, signer, signature, order_hash, status, filled_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id, created_at, updated_at]
+[parameters: (None, '0x2222222222222222222222222222222222222222222222222222222222222222', '1', '0xda932ff69169319cfc285c3bd42dc63b018994df', '1000000', '1000000', 1771368742, 622034, 50, 'BUY', '0x0000000000000000000000000000000000000000', '0xcf72d0a77a53bc8b099d0533ea124c9aa9ead98cc24af7adc5bf430884fe56f10fd7595c943a963c673edf21b796ede14e0c3d7792a61d6cc473d036f11e43a71c', '0xe9a5d624a953fb8a1d0a5dcf73b7d96b11c52619ab71dab95fdd4b015e79bdc9', 'OPEN', '0')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-02-17 16:52:24 | INFO | 7ebd4892-99aa-4c45-90eb-f64d37abc86e | anonymous | POST /api/v1/terminal/clob/orders | 500 | 17.98ms | POST /api/v1/terminal/clob/orders - 500 - 17.98ms
+2026-02-17 16:55:16 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:55:16 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:55:16 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:55:16 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:55:44 | INFO | a587fa04-56a9-466d-84f7-400c92ac83d7 | anonymous | OPTIONS /api/v1/terminal/clob/orders | 400 | 0.14ms | OPTIONS /api/v1/terminal/clob/orders - 400 - 0.14ms
+2026-02-17 16:56:10 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:56:10 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:56:10 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:56:11 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:56:11 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:56:11 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:56:11 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:56:51 | INFO | 1ff6e13b-679e-4b21-a5e6-f6d0aa071dc5 | anonymous | OPTIONS /api/v1/terminal/clob/orders | 200 | 0.19ms | OPTIONS /api/v1/terminal/clob/orders - 200 - 0.19ms
+2026-02-17 16:56:51 | ERROR | unknown | anonymous | POST /api/v1/terminal/clob/orders | - | -ms | Unhandled exception: TypeError: submit_order() takes 2 positional arguments but 3 were given
+2026-02-17 16:57:18 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:57:18 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:57:18 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:57:19 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:57:19 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:57:19 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:57:19 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:57:33 | INFO | 8a20fff6-32a3-48a7-b11e-1b9ec41c10d0 | anonymous | POST /api/v1/terminal/clob/orders | 201 | 31.62ms | POST /api/v1/terminal/clob/orders - 201 - 31.62ms
+2026-02-17 16:58:53 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:58:53 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:58:53 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:58:54 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:58:54 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:58:54 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:58:54 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:59:08 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:59:08 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:59:08 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:59:10 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:59:10 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:59:10 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:59:10 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:59:27 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:59:27 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:59:27 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:59:28 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:59:28 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:59:28 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:59:28 | INFO | - | - | - - | - | -ms | ✅ Redis initialized

@@ -63,6 +63,7 @@ settings = get_settings()
 async def submit_order(
     db: AsyncSession,
     payload: OrderCreate,
+    current_user: User,
 ) -> OrderResponse:
     """
     Validate and persist a new signed order, then run matching.
@@ -117,7 +118,7 @@ async def submit_order(
 
     # Persist the order.
     order = Order(
-        user_id=None,
+        user_id=current_user.id,
         condition_id=payload.condition_id,
         token_id=payload.token_id,
         maker_address=payload.maker_address,

@@ -19,7 +19,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
-from app.database.connection import async_session_factory
+from app.database.connection import get_db_session
 from app.modules.terminal.clob.models import Fill, FillStatus, Order
 from app.services.chain_service import chain
 
@@ -55,7 +55,7 @@ async def _settle_fills_async() -> None:
     4. Call CTFExchange.fillOrders() with the batch
     5. Update fill status based on transaction result
     """
-    async with async_session_factory() as db:
+    async for db in get_db_session():
         # Fetch all PENDING fills
         result = await db.execute(
             select(Fill)
@@ -122,7 +122,7 @@ async def _settle_condition_fills(
         # In a full implementation, you'd match maker and taker orders
         
         # Build ChainOrder struct
-        from app.services.chain_service import ChainOrder, ChainOrderSide
+        from app.services.chain_service import ChainOrder, OrderSide as ChainOrderSide
         
         chain_order = ChainOrder(
             maker=maker_order.maker_address,
@@ -198,7 +198,7 @@ def settle_fill_by_id(fill_id: int):
     logger.info(f"Settling fill {fill_id}")
     
     async def _settle_one():
-        async with async_session_factory() as db:
+        async for db in get_db_session():
             fill = await db.get(Fill, fill_id)
             if not fill or fill.status != FillStatus.PENDING:
                 logger.warning(f"Fill {fill_id} not found or not pending")

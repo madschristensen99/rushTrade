@@ -37,6 +37,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db
 from app.modules.terminal.clob import service
+from app.modules.user.models import User
 from app.modules.terminal.clob.schema import (
     BtcRoundResponse,
     FillResponse,
@@ -164,7 +165,7 @@ async def submit_order(
         await db.flush()
     
     try:
-        return await service.submit_order(db, payload)
+        return await service.submit_order(db, payload, current_user)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
