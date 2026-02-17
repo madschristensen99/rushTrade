@@ -4,9 +4,9 @@ from typing import List, Dict, Any
 from datetime import datetime
 import json
 
-from app.modules.terminal.auto.models import TradingInstance, InstanceStatus, ScriptType
-from app.modules.terminal.auto.schema import DeployConfig, InstanceResponse
-from app.modules.terminal.auto.crypto import CryptoService
+from app.modules.terminal.amm.models import TradingInstance, InstanceStatus, ScriptType
+from app.modules.terminal.amm.schema import DeployConfig, InstanceResponse
+from app.modules.terminal.amm.crypto import CryptoService
 from app.core.exceptions import BadRequestError, NotFoundError
 from app.tasks.trading_tasks import start_trading_instance
 from app.config import get_settings
