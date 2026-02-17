@@ -1121,11 +1121,8 @@ let pythUpdateInterval = 1000; // Update from Pyth every 1 second
 async function fetchPythPrice() {
   try {
     if (!window.pythReady) {
-      console.log('Pyth not ready yet');
       return false;
     }
-    
-    console.log('Fetching BTC price from Pyth Hermes API...');
     
     // Fetch directly from Pyth Hermes API
     const response = await fetch(`https://hermes.pyth.network/v2/updates/price/latest?ids[]=${BTC_USD_PRICE_FEED_ID}`);
@@ -1135,17 +1132,14 @@ async function fetchPythPrice() {
     }
     
     const data = await response.json();
-    console.log('Pyth API response:', data);
     
     if (data.parsed && data.parsed.length > 0) {
       const priceData = data.parsed[0].price;
       // Convert price (Pyth returns price with exponent)
       const btcPrice = parseFloat(priceData.price) * Math.pow(10, priceData.expo);
-      console.log('BTC Price from Pyth:', btcPrice, 'Raw:', priceData.price, 'Expo:', priceData.expo);
       currentPrice = btcPrice;
       return true;
     } else {
-      console.warn('No price data in response');
       return false;
     }
   } catch (error) {
@@ -1374,25 +1368,19 @@ async function initApp() {
   await new Promise(resolve => setTimeout(resolve, 500));
   
   // Fetch initial price from Pyth
-  console.log('Fetching initial BTC price from Pyth...');
   const success = await fetchPythPrice();
   
   if (success) {
-    console.log('Successfully fetched BTC price:', currentPrice);
     // Initialize price history with current price
     priceHistory = [currentPrice];
     openPrice = currentPrice;
     gridPriceHigh = currentPrice + 100;
     gridPriceLow = currentPrice - 100;
-  } else {
-    console.warn('Failed to fetch Pyth price, using default:', currentPrice);
   }
   
   resize(); draw(); updateBetUI();
   document.getElementById('openPrice').textContent = '$' + openPrice.toFixed(0);
   document.getElementById('currentPrice').textContent = '$' + currentPrice.toFixed(2);
-  
-  console.log('App initialized with BTC price:', currentPrice);
   
   // Start price updates
   setInterval(tick, 350);
