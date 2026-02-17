@@ -55,13 +55,20 @@ class Settings(BaseSettings):
     def celery_backend(self) -> str:
         return self.CELERY_RESULT_BACKEND or self.redis_url
     
-    # Kalshi API
-    KALSHI_API_BASE: str = "https://trading-api.kalshi.com/trade-api/v2"
-    KALSHI_API_KEY: str = ""
-    KALSHI_API_SECRET: str = ""
-    KALSHI_USER_ID: str = ""
-    
-    # Rate Limiting
+    # ── Monad / Chain ─────────────────────────────────────────────────────────
+    MONAD_RPC_URL: str = "https://testnet-rpc.monad.xyz"
+    MONAD_CHAIN_ID: int = 41454          # Monad testnet; change to mainnet ID when live
+
+    # Deployed contract addresses (populated after `forge script Deploy.s.sol`)
+    CTF_ADDRESS: str = ""                # ConditionalTokens.sol
+    MARKET_FACTORY_ADDRESS: str = ""     # MarketFactory.sol
+    CTF_EXCHANGE_ADDRESS: str = ""       # CTFExchange.sol
+    COLLATERAL_TOKEN_ADDRESS: str = ""   # USDC or other whitelisted collateral
+
+    # Operator key – the backend EOA that calls fillOrders() on-chain
+    OPERATOR_PRIVATE_KEY: str = ""
+
+    # ── Rate Limiting ──────────────────────────────────────────────────────────
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_PER_MINUTE: int = 60
     

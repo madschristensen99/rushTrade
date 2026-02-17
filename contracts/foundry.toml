@@ -1,0 +1,25 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+solc = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+[profile.default.fuzz]
+runs = 256
+
+[rpc_endpoints]
+monad_testnet = "${MONAD_TESTNET_RPC_URL}"
+monad_mainnet = "${MONAD_MAINNET_RPC_URL}"
+anvil = "http://127.0.0.1:8545"
+
+[etherscan]
+monad_testnet = { key = "${MONAD_ETHERSCAN_API_KEY}", url = "${MONAD_TESTNET_EXPLORER_URL}" }
