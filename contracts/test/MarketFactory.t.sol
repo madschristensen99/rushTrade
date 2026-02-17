@@ -114,13 +114,14 @@ contract MarketFactoryTest is Test {
         assertEq(m.category, "Crypto");
 
         // conditionId should match what CTF computes.
-        bytes32 expectedConditionId = ctf.getConditionId(oracle, questionId, 2);
+        // The factory uses address(this) as the CTF oracle in prepareCondition.
+        bytes32 expectedConditionId = ctf.getConditionId(address(factory), questionId, 2);
         assertEq(conditionId, expectedConditionId);
     }
 
     function test_CreateMarket_EmitsEvent() public {
         uint256 resolutionTime = block.timestamp + 7 days;
-        bytes32 expectedConditionId = ctf.getConditionId(oracle, questionId, 2);
+        bytes32 expectedConditionId = ctf.getConditionId(address(factory), questionId, 2);
 
         vm.expectEmit(true, true, true, true);
         emit MarketFactory.MarketCreated(

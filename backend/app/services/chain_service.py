@@ -149,6 +149,31 @@ _FACTORY_ABI: list[dict] = [
         "inputs": [{"name": "conditionId", "type": "bytes32"}],
         "outputs": [{"name": "yesId", "type": "uint256"}, {"name": "noId", "type": "uint256"}],
     },
+    {
+        "name": "createMarket",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "questionId", "type": "bytes32"},
+            {"name": "oracle", "type": "address"},
+            {"name": "collateralToken", "type": "address"},
+            {"name": "resolutionTime", "type": "uint256"},
+            {"name": "title", "type": "string"},
+            {"name": "description", "type": "string"},
+            {"name": "category", "type": "string"},
+        ],
+        "outputs": [{"name": "conditionId", "type": "bytes32"}],
+    },
+    {
+        "name": "resolveMarket",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "conditionId", "type": "bytes32"},
+            {"name": "payouts", "type": "uint256[]"},
+        ],
+        "outputs": [],
+    },
 ]
 
 _EXCHANGE_ABI: list[dict] = [
@@ -528,6 +553,96 @@ class ChainService:
         tx["gas"] = await self.w3.eth.estimate_gas(tx)
         signed = self._operator.sign_transaction(tx)
         tx_hash = await self.w3.eth.send_raw_transaction(signed.raw_transaction)
+        return tx_hash.hex()
+
+    # -----------------------------------------------------------------------
+    # MarketFactory write calls (operator-signed transactions)
+    # -----------------------------------------------------------------------
+
+    async def create_market_onchain(
+        self,
+        question_id: bytes,
+        oracle: str,
+        collateral_token: str,
+        resolution_time: int,
+        title: str,
+        description: str,
+        category: str,
+    ) -> str:
+        """
+        Call MarketFactory.createMarket() as the operator (who must be the owner).
+        Returns the 0x-prefixed hex conditionId emitted by the contract.
+        """
+        if not self._operator:
+            raise RuntimeError("Operator private key not configured")
+
+        nonce = await self.w3.eth.get_transaction_count(self._operator.address)
+        gas_price = await self.w3.eth.gas_price
+
+        tx = await self.factory.functions.createMarket(
+            question_id,
+            AsyncWeb3.to_checksum_address(oracle),
+            AsyncWeb3.to_checksum_address(collateral_token),
+            resolution_time,
+            title,
+            description,
+            category,
+        ).build_transaction(
+            {
+                "from": self._operator.address,
+                "nonce": nonce,
+                "gasPrice": gas_price,
+                "chainId": settings.MONAD_CHAIN_ID,
+            }
+        )
+        tx["gas"] = await self.w3.eth.estimate_gas(tx)
+
+        signed = self._operator.sign_transaction(tx)
+        tx_hash = await self.w3.eth.send_raw_transaction(signed.raw_transaction)
+        receipt = await self.w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        # The return value is the conditionId.  Decode it from the tx output.
+        result = await self.factory.functions.createMarket(
+            question_id,
+            AsyncWeb3.to_checksum_address(oracle),
+            AsyncWeb3.to_checksum_address(collateral_token),
+            resolution_time,
+            title,
+            description,
+            category,
+        ).call({"from": self._operator.address})
+        condition_id_hex = "0x" + result.hex()
+        logger.info("createMarket tx %s → conditionId %s", tx_hash.hex(), condition_id_hex)
+        return condition_id_hex
+
+    async def resolve_market_onchain(self, condition_id_hex: str, payouts: list[int]) -> str:
+        """
+        Call MarketFactory.resolveMarket() as the operator (who must be the market oracle).
+        Returns the transaction hash.
+        """
+        if not self._operator:
+            raise RuntimeError("Operator private key not configured")
+
+        cid = bytes.fromhex(condition_id_hex.lstrip("0x"))
+        nonce = await self.w3.eth.get_transaction_count(self._operator.address)
+        gas_price = await self.w3.eth.gas_price
+
+        tx = await self.factory.functions.resolveMarket(
+            cid, payouts
+        ).build_transaction(
+            {
+                "from": self._operator.address,
+                "nonce": nonce,
+                "gasPrice": gas_price,
+                "chainId": settings.MONAD_CHAIN_ID,
+            }
+        )
+        tx["gas"] = await self.w3.eth.estimate_gas(tx)
+
+        signed = self._operator.sign_transaction(tx)
+        tx_hash = await self.w3.eth.send_raw_transaction(signed.raw_transaction)
+        await self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        logger.info("resolveMarket tx %s conditionId %s", tx_hash.hex(), condition_id_hex)
         return tx_hash.hex()
 
     # -----------------------------------------------------------------------

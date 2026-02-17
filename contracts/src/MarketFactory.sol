@@ -121,11 +121,13 @@ contract MarketFactory is Ownable2Step {
         require(bytes(title).length > 0, "MarketFactory: empty title");
 
         // Binary market: 2 outcome slots.
-        conditionId = ctf.getConditionId(oracle, questionId, 2);
+        // The factory itself is the CTF oracle so that resolveMarket() can call
+        // ctf.reportPayouts() — the CTF uses msg.sender as the oracle identity,
+        // so the address used in prepareCondition must match whoever calls reportPayouts.
+        conditionId = ctf.getConditionId(address(this), questionId, 2);
         require(markets[conditionId].oracle == address(0), "MarketFactory: market already exists");
 
-        // Prepare the condition on the CTF (noop if already prepared externally).
-        ctf.prepareCondition(oracle, questionId, 2);
+        ctf.prepareCondition(address(this), questionId, 2);
 
         markets[conditionId] = Market({
             questionId: questionId,
