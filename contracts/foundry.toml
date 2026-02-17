@@ -4,13 +4,16 @@ out = "out"
 libs = ["lib"]
 test = "test"
 script = "script"
-solc = "0.8.24"
 optimizer = true
 optimizer_runs = 200
 via_ir = false
+# No global solc pin — Foundry will pick the right compiler per-file based on
+# each pragma, which lets the Gnosis CTF (^0.5.1) and our contracts (^0.8.24)
+# coexist in the same project.
 remappings = [
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
     "forge-std/=lib/forge-std/src/",
+    "conditional-tokens/=lib/conditional-tokens-contracts/contracts/",
 ]
 
 [profile.default.fuzz]

@@ -202,7 +202,10 @@ contract MarketFactory is Ownable2Step {
         }
     }
 
-    /// @notice Convenience: get the YES/NO ERC-1155 position IDs for a market.
+    /// @notice Convenience: derive the YES/NO ERC-1155 position IDs for a market.
+    ///         Uses the canonical Gnosis CTHelpers formulas via the CTF interface.
+    ///           YES = indexSet 0b01 = 1
+    ///           NO  = indexSet 0b10 = 2
     function getPositionIds(bytes32 conditionId)
         external
         view
@@ -210,6 +213,10 @@ contract MarketFactory is Ownable2Step {
     {
         Market storage m = markets[conditionId];
         require(m.oracle != address(0), "MarketFactory: market does not exist");
-        (yesId, noId) = ctf.getPositionIds(IERC20(m.collateralToken), conditionId);
+        IERC20 collateral = IERC20(m.collateralToken);
+        bytes32 yesCollection = ctf.getCollectionId(bytes32(0), conditionId, 1);
+        bytes32 noCollection  = ctf.getCollectionId(bytes32(0), conditionId, 2);
+        yesId = ctf.getPositionId(collateral, yesCollection);
+        noId  = ctf.getPositionId(collateral, noCollection);
     }
 }

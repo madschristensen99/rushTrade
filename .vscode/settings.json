@@ -1,0 +1,14 @@
+{
+  "solidity.packageDefaultDependenciesDirectory": "contracts/lib",
+  "solidity.packageDefaultDependenciesContractsDirectory": "src",
+  "solidity.remappings": [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "forge-std/=lib/forge-std/src/",
+    "conditional-tokens/=lib/conditional-tokens-contracts/contracts/"
+  ],
+  "solidity.remappingsWindows": [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "forge-std/=lib/forge-std/src/",
+    "conditional-tokens/=lib/conditional-tokens-contracts/contracts/"
+  ]
+}
