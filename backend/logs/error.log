@@ -53,3 +53,10 @@ WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2
 2026-02-11 00:30:55 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
 2026-02-11 00:30:55 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
 2026-02-11 15:45:32 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: AttributeError: 'TerminalService' object has no attribute 'pause_instance'
+2026-02-17 16:24:04 | ERROR | unknown | app.core.exceptions:generic_exception_handler:165 | Unhandled exception: InvalidPasswordError: password authentication failed for user "postgres"
+2026-02-17 16:29:18 | ERROR | unknown | app.core.exceptions:sqlalchemy_exception_handler:140 | Database error: (sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.username = ?]
+[parameters: ('demo_user',)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)

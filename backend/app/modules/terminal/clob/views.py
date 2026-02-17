@@ -145,6 +145,24 @@ async def submit_order(
       - Persist any matches as PENDING fills.
       - The settlement task will submit matched fills on-chain asynchronously.
     """
+    # For development: create a mock user if not authenticated
+    # In production, this would require proper authentication
+    from sqlalchemy import select
+    result = await db.execute(select(User).where(User.username == "demo_user"))
+    current_user = result.scalar_one_or_none()
+    
+    if not current_user:
+        # Create demo user
+        current_user = User(
+            username="demo_user",
+            email="demo@rushtrade.com",
+            hashed_password="demo",  # Not used for wallet-based trading
+            is_active=True,
+            is_superuser=False
+        )
+        db.add(current_user)
+        await db.flush()
+    
     try:
         return await service.submit_order(db, payload)
     except ValueError as exc:

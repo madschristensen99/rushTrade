@@ -20,13 +20,20 @@ async def init_db() -> None:
     """Initialize database engine and session maker."""
     global engine, AsyncSessionLocal
     
-    engine = create_async_engine(
-        settings.database_url.replace("postgresql://", "postgresql+asyncpg://"),
-        echo=settings.DEBUG,
-        pool_pre_ping=True,
-        pool_size=10,
-        max_overflow=20,
-    )
+    db_url = settings.database_url
+    if "postgresql" in db_url and "postgresql+asyncpg" not in db_url:
+        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
+    
+    # SQLite doesn't support pool settings
+    engine_kwargs = {"echo": settings.DEBUG}
+    if "sqlite" not in db_url:
+        engine_kwargs.update({
+            "pool_pre_ping": True,
+            "pool_size": 10,
+            "max_overflow": 20,
+        })
+    
+    engine = create_async_engine(db_url, **engine_kwargs)
     
     AsyncSessionLocal = async_sessionmaker(
         engine,

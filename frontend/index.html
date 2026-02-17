@@ -1208,25 +1208,49 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
       throw new Error('Failed to sign order: ' + signError.message);
     }
     
-    // Step 4: Execute trade on-chain (self-fill for demo)
-    btn.textContent = 'Executing trade...';
+    // Step 4: Submit order to backend
+    btn.textContent = 'Submitting to orderbook...';
     
-    // For now, we'll create a simple self-fill transaction
-    // In production, this would go to backend orderbook and be matched
     try {
-      // Since we don't have a counter-party, let's just log the signed order
-      // In production: POST to backend API with order + signature
-      console.log('📤 Signed order ready for submission:');
-      console.log('Order:', order);
-      console.log('Signature:', signature);
-      console.log('\n🔗 This order would be submitted to the backend orderbook');
-      console.log('Backend would match it and call CTFExchange.fillOrders()');
+      // Submit signed order to backend CLOB
+      const orderPayload = {
+        condition_id: mockConditionId,
+        token_id: order.tokenId.toString(),
+        side: order.side === 0 ? 'buy' : 'sell',  // lowercase to match backend schema
+        maker_address: order.maker,
+        maker_amount: order.makerAmount.toString(),
+        taker_amount: order.takerAmount.toString(),
+        expiration: parseInt(order.expiration.toString()),
+        nonce: parseInt(order.nonce.toString()),
+        fee_rate_bps: parseInt(order.feeRateBps.toString()),
+        signer: order.signer,
+        signature: signature
+      };
       
-      // TODO: Implement actual fillOrder call when we have a matching system
-      // For now, just show success
+      console.log('📤 Submitting order to backend:', orderPayload);
+      
+      const response = await fetch('http://localhost:8000/api/v1/terminal/clob/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // TODO: Add auth token when user auth is implemented
+        },
+        body: JSON.stringify(orderPayload)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to submit order');
+      }
+      
+      const result = await response.json();
+      console.log('✅ Order submitted successfully:', result);
+      console.log('🔗 Order ID:', result.id);
+      console.log('📊 Backend will match and execute on-chain via CTFExchange');
+      
     } catch (tradeError) {
       console.error('Trade execution error:', tradeError);
-      throw new Error('Failed to execute trade: ' + tradeError.message);
+      throw new Error('Failed to submit order: ' + tradeError.message);
     }
     
     // Add new bet to active bets

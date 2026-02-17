@@ -17,19 +17,19 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # Database
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
+    DATABASE_URL: str | None = None  # Direct database URL override
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str
+    POSTGRES_DB: str = "rushtrade"
     
     @property
     def database_url(self) -> str:
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-    
-    @property
-    def DATABASE_URL(self) -> str:
-        return self.database_url
+        # Use DATABASE_URL if set, otherwise build from POSTGRES_ vars
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
+        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
     
     # Redis
     REDIS_HOST: str = "localhost"
@@ -72,8 +72,8 @@ class Settings(BaseSettings):
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_PER_MINUTE: int = 60
     
-    # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173"]
+    # CORS - Allow all localhost origins for development
+    CORS_ORIGINS: list[str] = ["*"]  # Allow all origins in development
     
     # Stripe
     STRIPE_SECRET_KEY: str | None = None

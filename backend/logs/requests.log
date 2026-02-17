@@ -868,3 +868,95 @@ WHERE trading_instances.user_id = $1::INTEGER AND trading_instances.status != $2
 2026-02-17 10:13:47 | INFO | 96fdbc76-58b6-4d6d-9b10-61113f9eec40 | 2 | GET /api/v1/terminal/auto/instances | 200 | 283.03ms | GET /api/v1/terminal/auto/instances - 200 - 283.03ms
 2026-02-17 10:13:47 | INFO | 955f6d55-bf96-4746-b256-25fd0c4cf04d | 2 | GET /api/v1/terminal/auto/instances | 200 | 55.52ms | GET /api/v1/terminal/auto/instances - 200 - 55.52ms
 2026-02-17 10:52:21 | INFO | f16e5083-0b3c-427f-a1a5-c43d0606a2f7 | anonymous | POST /api/v1/terminal/auto/logout | 401 | 3.71ms | POST /api/v1/terminal/auto/logout - 401 - 3.71ms
+2026-02-17 16:11:38 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:11:38 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:11:38 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:11:38 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:11:54 | INFO | 4e72b996-8bd6-4fd8-9114-b119711161b7 | anonymous | GET / | 404 | 0.25ms | GET / - 404 - 0.25ms
+2026-02-17 16:11:57 | INFO | b021da89-dcbf-46a0-b2f7-5a50ed2185c7 | anonymous | GET /docs | 404 | 0.18ms | GET /docs - 404 - 0.18ms
+2026-02-17 16:12:33 | INFO | 40f03f9a-3273-4afd-a304-c5dd573bb855 | anonymous | GET /api/v1/health | 404 | 0.45ms | GET /api/v1/health - 404 - 0.45ms
+2026-02-17 16:12:38 | INFO | 6b51fa84-16fe-43c8-94c2-086484754935 | anonymous | GET / | 404 | 0.24ms | GET / - 404 - 0.24ms
+2026-02-17 16:12:53 | INFO | d7d6415a-c856-4e53-aec1-70d5767d8964 | anonymous | GET /api/v1/docs | 200 | 0.34ms | GET /api/v1/docs - 200 - 0.34ms
+2026-02-17 16:15:55 | INFO | 8664cfb1-a75f-4c0e-89ae-61cab74a4159 | anonymous | OPTIONS /api/v1/clob/orders | 400 | 0.13ms | OPTIONS /api/v1/clob/orders - 400 - 0.13ms
+2026-02-17 16:20:37 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:20:37 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:20:37 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:20:38 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:20:38 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:20:38 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:20:38 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:20:39 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:20:39 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:20:39 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:20:39 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:20:45 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:20:45 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:20:45 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:20:45 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:20:45 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:20:45 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:20:47 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:20:47 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:20:47 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:20:47 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:21:22 | INFO | de83ceda-eec5-465f-a4c8-fd878efd31f0 | anonymous | OPTIONS /api/v1/clob/orders | 200 | 0.23ms | OPTIONS /api/v1/clob/orders - 200 - 0.23ms
+2026-02-17 16:21:22 | INFO | 2e641ed4-9a34-457c-8253-8d9e607daefe | anonymous | POST /api/v1/clob/orders | 404 | 0.35ms | POST /api/v1/clob/orders - 404 - 0.35ms
+2026-02-17 16:21:57 | INFO | 86625589-bb59-482a-835f-1677d471ec58 | anonymous | OPTIONS /api/v1/terminal/clob/orders | 200 | 0.14ms | OPTIONS /api/v1/terminal/clob/orders - 200 - 0.14ms
+2026-02-17 16:21:57 | INFO | 3b732cd7-d917-4df1-b350-f19c34e5783e | anonymous | POST /api/v1/terminal/clob/orders | 403 | 0.87ms | POST /api/v1/terminal/clob/orders - 403 - 0.87ms
+2026-02-17 16:22:24 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:22:24 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:22:24 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:22:58 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:22:58 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:22:58 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:22:58 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:23:19 | WARNING | unknown | anonymous | - - | - | -ms | Validation error on /api/v1/terminal/clob/orders
+2026-02-17 16:23:19 | INFO | ad31ba50-322a-43af-8f31-eb67ac16b06c | anonymous | POST /api/v1/terminal/clob/orders | 422 | 0.91ms | POST /api/v1/terminal/clob/orders - 422 - 0.91ms
+2026-02-17 16:24:04 | ERROR | unknown | anonymous | POST /api/v1/terminal/clob/orders | - | -ms | Unhandled exception: InvalidPasswordError: password authentication failed for user "postgres"
+2026-02-17 16:24:41 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:24:41 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:24:41 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:24:42 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:24:42 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:27:27 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:27:27 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:27:51 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:27:51 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:27:51 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:27:51 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:28:24 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:28:24 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:28:24 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:28:27 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:28:27 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:28:27 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:28:27 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:29:18 | ERROR | unknown | anonymous | - /api/v1/terminal/clob/orders | - | -ms | Database error: (sqlite3.OperationalError) no such table: users
+[SQL: SELECT users.id, users.username, users.email, users.hashed_password, users.is_active, users.is_superuser, users.created_at, users.updated_at 
+FROM users 
+WHERE users.username = ?]
+[parameters: ('demo_user',)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2026-02-17 16:29:18 | INFO | fd8a76f2-e71a-4fa9-89d0-5a25e55e9fe3 | anonymous | POST /api/v1/terminal/clob/orders | 500 | 22.24ms | POST /api/v1/terminal/clob/orders - 500 - 22.24ms
+2026-02-17 16:29:48 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:29:48 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:29:48 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:29:49 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:29:49 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:29:49 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:29:49 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:30:31 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:30:31 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:30:31 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:30:32 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:30:32 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:30:32 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:30:32 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:30:45 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 16:30:45 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 16:30:45 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 16:30:46 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 16:30:46 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 16:30:46 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 16:30:46 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 16:31:12 | INFO | ffb8689d-9b97-47a0-8e7d-8ef37702d8a5 | anonymous | POST /api/v1/terminal/clob/orders | 201 | 40.79ms | POST /api/v1/terminal/clob/orders - 201 - 40.79ms
