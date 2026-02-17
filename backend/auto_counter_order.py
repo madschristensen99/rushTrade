@@ -17,13 +17,18 @@ from app.modules.terminal.clob.schema import OrderCreate
 from app.modules.user.models import User
 from eth_account import Account
 from eth_account.messages import encode_typed_data
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Bot configuration
 CHAIN_ID = 10143
 EXCHANGE_ADDRESS = "0x5121fe4e7ba3130c56ea3e9e0c67c1b8eacccaa1"
 
-# Create a bot account
-bot_account = Account.from_key("0x" + "42" * 32)  # Deterministic key for testing
+# Bot uses its own deterministic wallet
+BOT_PRIVATE_KEY = "0x" + "42" * 32
+bot_account = Account.from_key(BOT_PRIVATE_KEY)
 BOT_ADDRESS = bot_account.address
 
 print(f"🤖 Auto Counter-Order Bot")
@@ -32,7 +37,8 @@ print(f"   Watching for new orders...")
 
 
 def sign_order(order_dict):
-    """Sign an order with EIP-712"""
+    """Sign an order with EIP-712 matching CTFExchange domain exactly"""
+    # Use the exact same structure as the frontend and smart contract
     domain = {
         "name": "CTFExchange",
         "version": "1",
@@ -66,7 +72,15 @@ def sign_order(order_dict):
         "signer": order_dict["signer"]
     }
     
-    signable_message = encode_typed_data(domain, types, message)
+    # Create full EIP-712 message
+    full_message = {
+        "types": types,
+        "primaryType": "Order",
+        "domain": domain,
+        "message": message
+    }
+    
+    signable_message = encode_typed_data(full_message=full_message)
     signed = bot_account.sign_message(signable_message)
     return "0x" + signed.signature.hex()
 

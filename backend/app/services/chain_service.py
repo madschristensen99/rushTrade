@@ -294,6 +294,30 @@ _EXCHANGE_ABI: list[dict] = [
         "inputs": [],
         "outputs": [{"name": "", "type": "bytes32"}],
     },
+    {
+        "name": "owner",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [],
+        "outputs": [{"name": "", "type": "address"}],
+    },
+    {
+        "name": "operators",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [{"name": "operator", "type": "address"}],
+        "outputs": [{"name": "", "type": "bool"}],
+    },
+    {
+        "name": "setOperator",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "operator", "type": "address"},
+            {"name": "approved", "type": "bool"},
+        ],
+        "outputs": [],
+    },
 ]
 
 # EIP-712 type string for off-chain hashing
@@ -665,14 +689,18 @@ class ChainService:
         if not self._operator:
             raise RuntimeError("Operator private key not configured")
         
+        print(f"DEBUG chain.fill_orders called with {len(orders)} orders, {len(fill_amounts)} amounts, {len(signatures)} sigs")
         if len(orders) != len(fill_amounts) or len(orders) != len(signatures):
+            print(f"ERROR: Length mismatch!")
             raise ValueError("orders, fill_amounts, and signatures must have same length")
         
+        print(f"DEBUG: Passed length check, starting order conversion...")
         logger.info(f"Filling {len(orders)} orders on-chain...")
         
         # Convert ChainOrder objects to tuples for contract call
-        order_tuples = [
-            (
+        order_tuples = []
+        for i, order in enumerate(orders):
+            order_tuple = (
                 AsyncWeb3.to_checksum_address(order.maker),
                 order.token_id,
                 order.maker_amount,
@@ -683,16 +711,23 @@ class ChainService:
                 int(order.side),
                 AsyncWeb3.to_checksum_address(order.signer)
             )
-            for order in orders
-        ]
+            order_tuples.append(order_tuple)
+            print(f"DEBUG Order {i} tuple: {order_tuple}")
+            logger.info(f"Order {i}: maker={order.maker}, tokenId={order.token_id}, side={order.side}")
+            logger.info(f"  makerAmount={order.maker_amount}, takerAmount={order.taker_amount}")
+            logger.info(f"  signer={order.signer}, sig={signatures[i][:20]}...")
         
         # Convert signatures to bytes
         sig_bytes = [bytes.fromhex(sig.lstrip("0x")) for sig in signatures]
+        print(f"DEBUG: Converted {len(sig_bytes)} signatures to bytes")
+        logger.info(f"Converted {len(sig_bytes)} signatures to bytes")
         
         # Build transaction
+        print(f"DEBUG: Building transaction...")
         nonce = await self.w3.eth.get_transaction_count(self._operator.address)
         gas_price = await self.w3.eth.gas_price
         
+        print(f"DEBUG: Calling fillOrders contract function...")
         tx = await self.exchange.functions.fillOrders(
             order_tuples,
             fill_amounts,
@@ -705,8 +740,10 @@ class ChainService:
                 "chainId": settings.MONAD_CHAIN_ID,
             }
         )
+        print(f"DEBUG: Transaction built successfully")
         
         # Estimate gas
+        print(f"DEBUG: Estimating gas...")
         try:
             tx["gas"] = await self.w3.eth.estimate_gas(tx)
         except Exception as e:

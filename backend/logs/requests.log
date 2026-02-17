@@ -1125,3 +1125,197 @@ WHERE users.username = ?]
 2026-02-17 16:59:28 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
 2026-02-17 16:59:28 | INFO | - | - | - - | - | -ms | ✅ Database initialized
 2026-02-17 16:59:28 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:02:50 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:02:50 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:02:50 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:02:51 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:02:51 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:02:51 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:02:51 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:09:05 | INFO | d3b5ecfa-a811-4c07-bb4c-c9d05655ab22 | anonymous | OPTIONS /api/v1/terminal/clob/orders | 200 | 0.17ms | OPTIONS /api/v1/terminal/clob/orders - 200 - 0.17ms
+2026-02-17 17:09:05 | INFO | 6473f1f8-2b4c-4419-93e7-32b46a172028 | anonymous | POST /api/v1/terminal/clob/orders | 201 | 40.8ms | POST /api/v1/terminal/clob/orders - 201 - 40.8ms
+2026-02-17 17:10:34 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:10:34 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:10:34 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:10:35 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:10:35 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:10:35 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:10:35 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:11:22 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:11:22 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:11:22 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:11:23 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:11:23 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:11:23 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:11:23 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:13:15 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:13:15 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:13:15 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:13:16 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:13:16 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:13:16 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:13:16 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:13:46 | INFO | 14986c01-aaef-4297-aa6c-9a2d3e034051 | anonymous | POST /api/v1/terminal/clob/orders | 201 | 30.52ms | POST /api/v1/terminal/clob/orders - 201 - 30.52ms
+2026-02-17 17:14:59 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:14:59 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:14:59 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:15:00 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:15:00 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:15:00 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:15:00 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:15:31 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:15:31 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:15:31 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:15:32 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:15:32 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:15:32 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:15:32 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:15:52 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:15:52 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:15:52 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:15:53 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:15:53 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:15:53 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:15:53 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:16:14 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:16:14 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:16:14 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:16:15 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:16:15 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:16:15 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:16:15 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:16:47 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:16:47 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:16:47 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:16:48 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:16:48 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:16:48 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:16:48 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:17:13 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:17:13 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:17:13 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:17:13 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:17:13 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:17:13 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:17:13 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:24:32 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:24:32 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:24:32 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:24:33 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:24:33 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:24:33 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:24:33 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:24:43 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:24:43 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:24:43 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:24:44 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:24:44 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:24:44 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:24:44 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:24:53 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:24:53 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:24:53 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:24:54 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:24:54 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:24:54 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:24:54 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:25:10 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:25:10 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:25:10 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:25:11 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:25:11 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:25:11 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:25:11 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:26:33 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:26:33 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:26:33 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:26:34 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:26:34 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:26:34 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:26:34 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:27:28 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:27:28 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:27:28 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:27:28 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:27:28 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:27:28 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:27:28 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:28:03 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:28:03 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:28:03 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:28:04 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:28:04 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:28:04 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:28:04 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:28:38 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:28:38 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:28:38 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:28:39 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:28:39 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:28:39 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:28:39 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:29:41 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:29:41 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:29:41 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:29:42 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:29:42 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:29:42 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:29:42 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:30:16 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:30:16 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:30:16 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:30:17 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:30:17 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:30:17 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:30:17 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:30:56 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:30:56 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:30:56 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:30:57 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:30:57 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:30:57 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:30:57 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:31:40 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:31:40 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:31:40 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:31:41 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:31:41 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:31:41 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:31:41 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:32:00 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:32:00 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:32:00 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:32:01 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:32:01 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:32:01 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:32:01 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:32:15 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:32:15 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:32:15 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:32:16 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:32:16 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:32:16 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:32:16 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:33:20 | INFO | 730bfb9c-259a-4559-bad1-4fe5343ed09e | anonymous | OPTIONS /api/v1/terminal/clob/orders | 200 | 0.09ms | OPTIONS /api/v1/terminal/clob/orders - 200 - 0.09ms
+2026-02-17 17:33:20 | INFO | 7b3c478a-f523-4799-a547-258aeef9e8cf | anonymous | POST /api/v1/terminal/clob/orders | 201 | 15.66ms | POST /api/v1/terminal/clob/orders - 201 - 15.66ms
+2026-02-17 17:37:28 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:37:28 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:37:28 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:37:29 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:37:29 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:37:29 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:37:29 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:38:02 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:38:02 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:38:02 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:38:03 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:38:03 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:38:03 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:38:03 | INFO | - | - | - - | - | -ms | ✅ Redis initialized
+2026-02-17 17:38:42 | INFO | - | - | - - | - | -ms | 🛑 Shutting down application...
+2026-02-17 17:38:42 | INFO | - | - | - - | - | -ms | ✅ Redis closed
+2026-02-17 17:38:42 | INFO | - | - | - - | - | -ms | ✅ Database closed
+2026-02-17 17:38:43 | INFO | - | - | - - | - | -ms | Logging initialized - Environment: development
+2026-02-17 17:38:43 | INFO | - | - | - - | - | -ms | 🚀 Starting application...
+2026-02-17 17:38:43 | INFO | - | - | - - | - | -ms | ✅ Database initialized
+2026-02-17 17:38:43 | INFO | - | - | - - | - | -ms | ✅ Redis initialized

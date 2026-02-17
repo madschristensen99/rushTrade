@@ -85,8 +85,11 @@ async def _settle_fills_async() -> None:
             fills_by_condition[condition_id].append((fill, maker_order))
         
         # Settle each condition's fills
+        print(f"DEBUG: About to settle {len(fills_by_condition)} conditions")
         for condition_id, fills_data in fills_by_condition.items():
+            print(f"DEBUG: Calling _settle_condition_fills for {condition_id}")
             await _settle_condition_fills(db, condition_id, fills_data)
+            print(f"DEBUG: Finished _settle_condition_fills for {condition_id}")
         
         await db.commit()
 
@@ -112,38 +115,73 @@ async def _settle_condition_fills(
     signatures = []
     fill_ids = []
     
-    for fill, maker_order in fills_data:
-        # Get taker order if it exists
-        taker_order = None
-        if fill.taker_order_id:
-            taker_order = await db.get(Order, fill.taker_order_id)
-        
-        # For now, we'll use the maker order
-        # In a full implementation, you'd match maker and taker orders
-        
-        # Build ChainOrder struct
-        from app.services.chain_service import ChainOrder, OrderSide as ChainOrderSide
-        
-        chain_order = ChainOrder(
-            maker=maker_order.maker_address,
-            token_id=int(maker_order.token_id),
-            maker_amount=int(maker_order.maker_amount),
-            taker_amount=int(maker_order.taker_amount),
-            expiration=maker_order.expiration,
-            nonce=maker_order.nonce,
-            fee_rate_bps=maker_order.fee_rate_bps,
-            side=ChainOrderSide.BUY if maker_order.side.value == "buy" else ChainOrderSide.SELL,
-            signer=maker_order.signer if maker_order.signer != "0x" + "0" * 40 else maker_order.maker_address,
-        )
-        
-        orders.append(chain_order)
-        fill_amounts.append(int(fill.token_amount))
-        signatures.append(maker_order.signature)
-        fill_ids.append(fill.id)
+    try:
+        logger.info(f"Starting to process {len(fills_data)} fills...")
+        for i, (fill, maker_order) in enumerate(fills_data):
+            logger.info(f"Processing fill {i+1}/{len(fills_data)}: fill_id={fill.id}")
+            # Get taker order
+            taker_order = None
+            if fill.taker_order_id:
+                taker_order = await db.get(Order, fill.taker_order_id)
+            
+            if not taker_order:
+                logger.error(f"Fill {fill.id}: taker order {fill.taker_order_id} not found")
+                continue
+            
+            # Build ChainOrder structs for BOTH maker and taker
+            from app.services.chain_service import ChainOrder, OrderSide as ChainOrderSide
+            
+            # Add maker order
+            maker_chain_order = ChainOrder(
+                maker=maker_order.maker_address,
+                token_id=int(maker_order.token_id),
+                maker_amount=int(maker_order.maker_amount),
+                taker_amount=int(maker_order.taker_amount),
+                expiration=maker_order.expiration,
+                nonce=maker_order.nonce,
+                fee_rate_bps=maker_order.fee_rate_bps,
+                side=ChainOrderSide.BUY if maker_order.side.value == "buy" else ChainOrderSide.SELL,
+                signer=maker_order.signer,  # Use exact signer as it was signed
+            )
+            
+            # Add taker order
+            taker_chain_order = ChainOrder(
+                maker=taker_order.maker_address,
+                token_id=int(taker_order.token_id),
+                maker_amount=int(taker_order.maker_amount),
+                taker_amount=int(taker_order.taker_amount),
+                expiration=taker_order.expiration,
+                nonce=taker_order.nonce,
+                fee_rate_bps=taker_order.fee_rate_bps,
+                side=ChainOrderSide.BUY if taker_order.side.value == "buy" else ChainOrderSide.SELL,
+                signer=taker_order.signer,  # Use exact signer as it was signed
+            )
+            
+            # Add both orders
+            orders.append(maker_chain_order)
+            orders.append(taker_chain_order)
+            fill_amounts.append(int(fill.token_amount))
+            fill_amounts.append(int(fill.token_amount))
+            signatures.append(maker_order.signature)
+            signatures.append(taker_order.signature)
+            fill_ids.append(fill.id)
+    except Exception as e:
+        logger.error(f"Error preparing orders: {e}", exc_info=True)
+        raise
+    
+    print(f"DEBUG: Prepared {len(orders)} orders, {len(fill_amounts)} amounts, {len(signatures)} signatures")
+    logger.info(f"Prepared {len(orders)} orders, {len(fill_amounts)} amounts, {len(signatures)} signatures")
+    if len(orders) == 0:
+        logger.warning("No orders to settle!")
+        return
     
     # Call CTFExchange.fillOrders() on-chain
     try:
+        print(f"DEBUG: About to call chain.fill_orders with {len(orders)} orders")
         logger.info(f"Calling CTFExchange.fillOrders() with {len(orders)} orders")
+        for i, (order, sig) in enumerate(zip(orders, signatures)):
+            print(f"DEBUG: Order {i}: maker={order.maker}, side={order.side}")
+            logger.info(f"  Order {i}: maker={order.maker}, side={order.side}, sig={sig[:20]}...")
         
         # Execute on-chain!
         tx_hash = await chain.fill_orders(orders, fill_amounts, signatures)
