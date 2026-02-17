@@ -24,10 +24,10 @@ RushTrade is a high-speed prediction market platform where users can bet on BTC 
 
 | Contract | Address | Explorer |
 |----------|---------|----------|
-| **ConditionalTokens** | `0x5Ec0724EA68a8F5c8aE7a87eaFe136730252f1fF` | [View](https://explorer.testnet.monad.xyz/address/0x5Ec0724EA68a8F5c8aE7a87eaFe136730252f1fF) |
-| **MarketFactory** | `0xba465E13D3d5Fb09627EBab1eA6e86293438c5E3` | [View](https://explorer.testnet.monad.xyz/address/0xba465E13D3d5Fb09627EBab1eA6e86293438c5E3) |
-| **CTFExchange** | `0x5121fe4E7ba3130C56ea3e9E0C67C1b8EAcCCaA1` | [View](https://explorer.testnet.monad.xyz/address/0x5121fe4E7ba3130C56ea3e9E0C67C1b8EAcCCaA1) |
-| **USDC (Collateral)** | `0x534b2f3A21130d7a60830c2Df862319e593943A3` | [View](https://explorer.testnet.monad.xyz/address/0x534b2f3A21130d7a60830c2Df862319e593943A3) |
+| **ConditionalTokens** | `0x5ec0724ea68a8f5c8ae7a87eafe136730252f1ff` | [View](https://explorer.testnet.monad.xyz/address/0x5ec0724ea68a8f5c8ae7a87eafe136730252f1ff) |
+| **MarketFactory** | `0xba465e13d3d5fb09627ebab1ea6e86293438c5e3` | [View](https://explorer.testnet.monad.xyz/address/0xba465e13d3d5fb09627ebab1ea6e86293438c5e3) |
+| **CTFExchange** | `0x5121fe4e7ba3130c56ea3e9e0c67c1b8eacccaa1` | [View](https://explorer.testnet.monad.xyz/address/0x5121fe4e7ba3130c56ea3e9e0c67c1b8eacccaa1) |
+| **USDC (Collateral)** | `0x534b2f3a21130d7a60830c2df862319e593943a3` | [View](https://explorer.testnet.monad.xyz/address/0x534b2f3a21130d7a60830c2df862319e593943a3) |
 
 **Chain ID**: `10143` (Monad Testnet)  
 **RPC URL**: `https://testnet-rpc.monad.xyz`
