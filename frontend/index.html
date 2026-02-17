@@ -1145,121 +1145,46 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
       throw new Error('USDC approval failed');
     }
     
-    // Step 2: Create and sign order for CTFExchange
-    btn.textContent = 'Creating order...';
+    // Step 2: Determine which box to buy based on painted cells
+    // For now, we'll use a simple heuristic: pick box based on average cell position
+    // TODO: Let user explicitly choose box in UI
+    const avgCell = Array.from(selectedCells).reduce((sum, cell) => sum + cell, 0) / selectedCells.size;
+    const boxId = Math.min(10, Math.max(1, Math.ceil(avgCell / (TOTAL_CELLS / 10))));
     
-    // Use the real test market condition ID
-    const conditionId = '0x2222222222222222222222222222222222222222222222222222222222222222';
-    const yesTokenId = 1; // YES token
+    console.log(`🎯 Buying shares in Box ${boxId} with $${betAmount} USDC`);
+    console.log(`📋 Selected ${selectedCells.size} cells`);
     
-    // Create BUY order (user buys YES tokens with USDC)
-    const order = {
-      maker: walletAddress,
-      tokenId: yesTokenId,
-      makerAmount: BigInt(Math.floor(betAmount * 1e6)), // USDC amount (6 decimals)
-      takerAmount: BigInt(Math.floor(betAmount * 1e6)), // Token amount (assume 1:1 for now)
-      expiration: BigInt(Math.floor(Date.now() / 1000) + 3600), // 1 hour from now
-      nonce: BigInt(Math.floor(Math.random() * 1000000)),
-      feeRateBps: BigInt(50), // 0.5% fee
-      side: 0, // BUY = 0
-      signer: '0x0000000000000000000000000000000000000000' // No delegate signer
-    };
+    // Step 3: Call buyShares on RushTrade contract
+    btn.textContent = `Buying Box ${boxId} shares...`;
     
-    console.log('📝 Order created:', order);
-    console.log('💰 Buying', betAmount, 'YES tokens for $', betAmount, 'USDC');
+    const collateralAmount = BigInt(Math.floor(betAmount * 1e6)); // USDC has 6 decimals
     
-    // Step 3: Sign order with EIP-712
-    btn.textContent = 'Sign order...';
+    const { request } = await publicClient.simulateContract({
+      address: CONTRACTS.RushTrade,
+      abi: RUSHTRADE_ABI,
+      functionName: 'buyShares',
+      args: [boxId, collateralAmount],
+      account: walletAddress
+    });
     
-    const domain = {
-      name: 'CTFExchange',
-      version: '1',
-      chainId: 10143,
-      verifyingContract: CONTRACTS.CTFExchange
-    };
+    const hash = await walletClient.writeContract(request);
+    console.log('📤 Transaction sent:', hash);
     
-    const types = {
-      Order: [
-        { name: 'maker', type: 'address' },
-        { name: 'tokenId', type: 'uint256' },
-        { name: 'makerAmount', type: 'uint256' },
-        { name: 'takerAmount', type: 'uint256' },
-        { name: 'expiration', type: 'uint256' },
-        { name: 'nonce', type: 'uint256' },
-        { name: 'feeRateBps', type: 'uint256' },
-        { name: 'side', type: 'uint8' },
-        { name: 'signer', type: 'address' }
-      ]
-    };
+    btn.textContent = 'Confirming...';
     
-    let signature;
-    try {
-      signature = await walletClient.signTypedData({
-        account: walletAddress,
-        domain,
-        types,
-        primaryType: 'Order',
-        message: order
-      });
-      console.log('✅ Order signed:', signature);
-    } catch (signError) {
-      console.error('Signing error:', signError);
-      throw new Error('Failed to sign order: ' + signError.message);
-    }
-    
-    // Step 4: Submit order to backend
-    btn.textContent = 'Submitting to orderbook...';
-    
-    try {
-      // Submit signed order to backend CLOB
-      const orderPayload = {
-        condition_id: conditionId,
-        token_id: order.tokenId.toString(),
-        side: order.side === 0 ? 'buy' : 'sell',  // lowercase to match backend schema
-        maker_address: order.maker,
-        maker_amount: order.makerAmount.toString(),
-        taker_amount: order.takerAmount.toString(),
-        expiration: parseInt(order.expiration.toString()),
-        nonce: parseInt(order.nonce.toString()),
-        fee_rate_bps: parseInt(order.feeRateBps.toString()),
-        signer: order.signer,
-        signature: signature
-      };
-      
-      console.log('📤 Submitting order to backend:', orderPayload);
-      
-      const response = await fetch('http://localhost:8000/api/v1/terminal/clob/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // TODO: Add auth token when user auth is implemented
-        },
-        body: JSON.stringify(orderPayload)
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to submit order');
-      }
-      
-      const result = await response.json();
-      console.log('✅ Order submitted successfully:', result);
-      console.log('🔗 Order ID:', result.id);
-      console.log('📊 Backend will match and execute on-chain via CTFExchange');
-      
-    } catch (tradeError) {
-      console.error('Trade execution error:', tradeError);
-      throw new Error('Failed to submit order: ' + tradeError.message);
-    }
+    // Wait for confirmation
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    console.log('✅ Transaction confirmed:', receipt);
+    console.log(`🎮 View on explorer: https://testnet.monadscan.com/tx/${hash}`);
     
     // Add new bet to active bets
     activeBets.push({
       cells: new Set(selectedCells),
       amount: betAmount,
+      boxId: boxId,
       hitCells: new Set(),
       profitTicks: 0,
-      order: order,
-      signature: signature
+      txHash: hash
     });
     
     // Update USDC balance
@@ -1271,16 +1196,16 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
     draw();
     
     // Show success message
-    btn.textContent = '✅ Bet Placed!';
+    btn.textContent = '✅ Shares Bought!';
     setTimeout(() => {
       btn.textContent = originalText;
       btn.disabled = false;
     }, 2000);
     
-    console.log('✅ Bet placed successfully!');
+    console.log('✅ Successfully bought shares in Box', boxId);
   } catch (error) {
-    console.error('Error placing bet:', error);
-    alert('Failed to place bet: ' + (error.message || 'Unknown error'));
+    console.error('Error buying shares:', error);
+    alert('Failed to buy shares: ' + (error.shortMessage || error.message || 'Unknown error'));
     btn.textContent = originalText;
     btn.disabled = false;
   }
@@ -1558,13 +1483,9 @@ async function connectWallet() {
 
 // ===== CONTRACT INTEGRATION =====
 const CONTRACTS = {
-  ConditionalTokens: '0x5ec0724ea68a8f5c8ae7a87eafe136730252f1ff',
-  MarketFactory: '0xba465e13d3d5fb09627ebab1ea6e86293438c5e3',
-  CTFExchange: '0x5121fe4e7ba3130c56ea3e9e0c67c1b8eacccaa1',
-  USDC: '0x534b2f3a21130d7a60830c2df862319e593943a3'
+  RushTrade: '0xf20d297680cd451910eaa5fc58e73824d09e4688',
+  USDC: '0x534b2f3A21130d7a60830c2Df862319e593943A3'
 };
-
-let contractInstances = {};
 
 async function initializeContracts() {
   if (!publicClient || !walletClient) {
@@ -1575,17 +1496,7 @@ async function initializeContracts() {
   try {
     console.log('✅ Contracts initialized:', CONTRACTS);
     console.log('📍 View on explorer: https://testnet.monadscan.com');
-    
-    // Store contract addresses for later use
-    contractInstances = {
-      ctf: CONTRACTS.ConditionalTokens,
-      factory: CONTRACTS.MarketFactory,
-      exchange: CONTRACTS.CTFExchange,
-      usdc: CONTRACTS.USDC
-    };
-    
-    // Log contract info to console for debugging
-    console.log('Contract addresses loaded:', contractInstances);
+    console.log('🎮 RushTrade:', `https://testnet.monadscan.com/address/${CONTRACTS.RushTrade}`);
     
     // Show contract status in UI
     const contractStatus = document.getElementById('contractStatus');
@@ -1629,6 +1540,65 @@ const ERC20_ABI = [
     ],
     "name": "allowance",
     "outputs": [{"name": "", "type": "uint256"}],
+    "type": "function"
+  }
+];
+
+// RushTrade ABI (minimal - just what we need)
+const RUSHTRADE_ABI = [
+  {
+    "inputs": [
+      {"name": "boxId", "type": "uint8"},
+      {"name": "collateralAmount", "type": "uint256"}
+    ],
+    "name": "buyShares",
+    "outputs": [{"name": "positionId", "type": "uint256"}],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"name": "roundId", "type": "uint256"}],
+    "name": "getRound",
+    "outputs": [{
+      "components": [
+        {"name": "roundId", "type": "uint256"},
+        {"name": "startTime", "type": "uint256"},
+        {"name": "endTime", "type": "uint256"},
+        {"name": "openPrice", "type": "int256"},
+        {"name": "closePrice", "type": "int256"},
+        {"name": "winningBox", "type": "uint8"},
+        {"name": "settled", "type": "bool"}
+      ],
+      "name": "",
+      "type": "tuple"
+    }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentRound",
+    "outputs": [{
+      "components": [
+        {"name": "roundId", "type": "uint256"},
+        {"name": "startTime", "type": "uint256"},
+        {"name": "endTime", "type": "uint256"},
+        {"name": "openPrice", "type": "int256"},
+        {"name": "closePrice", "type": "int256"},
+        {"name": "winningBox", "type": "uint8"},
+        {"name": "settled", "type": "bool"}
+      ],
+      "name": "",
+      "type": "tuple"
+    }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentRoundId",
+    "outputs": [{"name": "", "type": "uint256"}],
+    "stateMutability": "view",
     "type": "function"
   }
 ];
@@ -1677,7 +1647,7 @@ async function checkUSDCAllowance(amount) {
       address: CONTRACTS.USDC,
       abi: ERC20_ABI,
       functionName: 'allowance',
-      args: [walletAddress, CONTRACTS.CTFExchange]
+      args: [walletAddress, CONTRACTS.RushTrade]
     });
     
     console.log('Current USDC allowance:', allowance.toString(), 'Need:', amountInUnits.toString());
@@ -1708,12 +1678,12 @@ async function approveUSDC(amount) {
     
     console.log('Requesting USDC approval for:', amountInUnits.toString());
     
-    // Approve CTFExchange to spend USDC
+    // Approve RushTrade to spend USDC
     const { request } = await publicClient.simulateContract({
       address: CONTRACTS.USDC,
       abi: ERC20_ABI,
       functionName: 'approve',
-      args: [CONTRACTS.CTFExchange, amountInUnits],
+      args: [CONTRACTS.RushTrade, amountInUnits],
       account: walletAddress
     });
     
