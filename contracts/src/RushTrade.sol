@@ -141,7 +141,25 @@ contract RushTrade is Ownable, ReentrancyGuard {
         require(collateralAmount > 0, "Amount must be > 0");
 
         Round storage round = rounds[currentRoundId];
-        require(round.openPrice != 0, "Open price not set");
+        
+        // Auto-start new round if opening price not set
+        if (round.openPrice == 0) {
+            // Try to get price from Pyth oracle
+            try pyth.getPriceUnsafe(btcUsdPriceId) returns (IPyth.Price memory priceData) {
+                int256 openPrice = int256(int64(priceData.price));
+                if (priceData.expo < 0) {
+                    openPrice = openPrice * int256(10 ** uint256(uint32(-priceData.expo)));
+                } else {
+                    openPrice = openPrice / int256(10 ** uint256(uint32(priceData.expo)));
+                }
+                if (openPrice > 0) {
+                    round.openPrice = openPrice;
+                }
+            } catch {
+                // Oracle failed, revert - owner must set price manually
+                revert("Open price not set - call setOpenPrice()");
+            }
+        }
 
         uint256 columnEndTime = round.startTime + uint256(columnId) * COLUMN_DURATION;
         require(block.timestamp < columnEndTime, "Column already expired");
