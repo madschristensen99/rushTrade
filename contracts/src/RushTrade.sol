@@ -6,6 +6,18 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+/// @notice Minimal Pyth oracle interface
+interface IPyth {
+    struct Price {
+        int64 price;
+        uint64 conf;
+        int32 expo;
+        uint publishTime;
+    }
+    
+    function getPriceUnsafe(bytes32 id) external view returns (Price memory price);
+}
+
 /// @title RushTrade
 /// @notice 60-second prediction market: 12 columns × 10 price levels = 120 cells.
 /// @dev Each column is 5 seconds wide and settles independently. Users can bet on
@@ -65,6 +77,9 @@ contract RushTrade is Ownable, ReentrancyGuard {
     // ============ STATE ============
 
     IERC20  public immutable collateralToken;
+    IPyth   public immutable pyth;
+    bytes32 public immutable btcUsdPriceId;
+    
     uint256 public currentRoundId;
     uint256 public feeRateBps = 50;  // 0.5% default
     uint256 public treasuryBalance;
@@ -96,9 +111,16 @@ contract RushTrade is Ownable, ReentrancyGuard {
 
     // ============ CONSTRUCTOR ============
 
-    constructor(address _collateralToken) Ownable(msg.sender) {
+    constructor(
+        address _collateralToken,
+        address _pyth,
+        bytes32 _btcUsdPriceId
+    ) Ownable(msg.sender) {
         require(_collateralToken != address(0), "Invalid collateral token");
+        require(_pyth != address(0), "Invalid Pyth address");
         collateralToken = IERC20(_collateralToken);
+        pyth = IPyth(_pyth);
+        btcUsdPriceId = _btcUsdPriceId;
         _startNewRound();
     }
 
@@ -151,7 +173,45 @@ contract RushTrade is Ownable, ReentrancyGuard {
         emit SharesBought(positionId, msg.sender, currentRoundId, columnId, levelId, shares, collateralAmount);
     }
 
-    /// @notice Settle a column once its 5-second window has elapsed.
+    /// @notice Settle a column using Pyth oracle price (anyone can call)
+    function settleColumnFromOracle(uint8 columnId) external {
+        require(columnId >= 1 && columnId <= NUM_COLUMNS, "Invalid column");
+
+        Round storage round = rounds[currentRoundId];
+        require(round.openPrice != 0, "Open price not set");
+
+        uint256 columnEndTime = round.startTime + uint256(columnId) * COLUMN_DURATION;
+        require(block.timestamp >= columnEndTime, "Column not ended yet");
+        require(!columns[currentRoundId][columnId].settled, "Already settled");
+
+        // Get current price from Pyth
+        IPyth.Price memory priceData = pyth.getPriceUnsafe(btcUsdPriceId);
+        int256 closePrice = int256(int64(priceData.price));
+        if (priceData.expo < 0) {
+            closePrice = closePrice * int256(10 ** uint256(uint32(-priceData.expo)));
+        } else {
+            closePrice = closePrice / int256(10 ** uint256(uint32(priceData.expo)));
+        }
+        
+        require(closePrice > 0, "Invalid price from oracle");
+
+        uint8 winningLevel = _calculateWinningLevel(round.openPrice, closePrice);
+
+        columns[currentRoundId][columnId] = Column({
+            settled:      true,
+            closePrice:   closePrice,
+            winningLevel: winningLevel
+        });
+
+        emit ColumnSettled(currentRoundId, columnId, closePrice, winningLevel);
+
+        // Roll over to a new round after the last column
+        if (columnId == NUM_COLUMNS) {
+            _startNewRound();
+        }
+    }
+    
+    /// @notice Fallback: owner can manually settle column if oracle fails
     /// @param columnId   Column to settle (1-12).
     /// @param closePrice BTC/USD price (with same precision as openPrice) at column end.
     function settleColumn(uint8 columnId, int256 closePrice) external onlyOwner {
@@ -297,7 +357,28 @@ contract RushTrade is Ownable, ReentrancyGuard {
 
     // ============ ADMIN FUNCTIONS ============
 
-    /// @notice Set the opening price for the current round (called by oracle/owner).
+    /// @notice Set opening price from Pyth oracle (anyone can call to start round)
+    function setOpenPriceFromOracle() external {
+        Round storage round = rounds[currentRoundId];
+        require(round.openPrice == 0, "Open price already set");
+        
+        // Get price from Pyth
+        IPyth.Price memory priceData = pyth.getPriceUnsafe(btcUsdPriceId);
+        
+        // Convert Pyth price: price * 10^(-expo)
+        // BTC/USD typically has expo = -8, so we need to scale it
+        int256 openPrice = int256(int64(priceData.price));
+        if (priceData.expo < 0) {
+            openPrice = openPrice * int256(10 ** uint256(uint32(-priceData.expo)));
+        } else {
+            openPrice = openPrice / int256(10 ** uint256(uint32(priceData.expo)));
+        }
+        
+        require(openPrice > 0, "Invalid price from oracle");
+        round.openPrice = openPrice;
+    }
+    
+    /// @notice Fallback: owner can manually set open price if oracle fails
     function setOpenPrice(int256 openPrice) external onlyOwner {
         Round storage round = rounds[currentRoundId];
         require(round.openPrice == 0, "Open price already set");

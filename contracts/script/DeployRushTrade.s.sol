@@ -10,24 +10,24 @@ contract DeployRushTrade is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
+        // Contract addresses
         address usdcAddress = 0x534b2f3A21130d7a60830c2Df862319e593943A3;
+        address pythAddress = 0xA2aa501b19aff244D90cc15a4Cf739D2725B5729; // Pyth on Monad testnet
+        bytes32 btcUsdPriceId = 0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43; // BTC/USD
+        
         console.log("Using USDC at:", usdcAddress);
+        console.log("Using Pyth at:", pythAddress);
 
-        RushTrade rushTrade = new RushTrade(usdcAddress);
+        RushTrade rushTrade = new RushTrade(usdcAddress, pythAddress, btcUsdPriceId);
         console.log("RushTrade deployed at:", address(rushTrade));
-
-        // Set the opening price immediately so buyShares works from block 0.
-        // Using Pyth-compatible 8-decimal integer: $97,000 = 9700000000000
-        // Update this to today's BTC price before deploying.
-        int256 openPrice = 9700000000000; // $97,000 with 8 decimal places
-        rushTrade.setOpenPrice(openPrice);
-        console.log("Open price set:", uint256(openPrice));
+        console.log("\nNOTE: Call setOpenPriceFromOracle() or setOpenPrice() to start trading");
 
         vm.stopBroadcast();
 
         console.log("\n=== DEPLOYMENT SUMMARY ===");
-        console.log("USDC:      ", usdcAddress);
-        console.log("RushTrade: ", address(rushTrade));
-        console.log("Round ID:  ", rushTrade.currentRoundId());
+        console.log("USDC:       ", usdcAddress);
+        console.log("Pyth:       ", pythAddress);
+        console.log("RushTrade:  ", address(rushTrade));
+        console.log("Round ID:   ", rushTrade.currentRoundId());
     }
 }

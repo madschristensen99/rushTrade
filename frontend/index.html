@@ -1148,13 +1148,28 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
     // Row 0 (top) = level 1 (most bullish), row 9 (bottom) = level 10 (most bearish).
     // Col 0 = column 1 (first 5s), col 11 = column 12 (last 5s).
     const cells = Array.from(selectedCells);
-    const avgRow = cells.reduce((sum, cell) => sum + parseInt(cell.split('-')[0], 10), 0) / cells.length;
-    const avgCol = cells.reduce((sum, cell) => sum + parseInt(cell.split('-')[1], 10), 0) / cells.length;
+    
+    if (cells.length === 0) {
+      throw new Error('No cells selected');
+    }
+    
+    const avgRow = cells.reduce((sum, cell) => {
+      const parts = cell.split('-');
+      return sum + parseInt(parts[0], 10);
+    }, 0) / cells.length;
+    
+    const avgCol = cells.reduce((sum, cell) => {
+      const parts = cell.split('-');
+      return sum + parseInt(parts[1], 10);
+    }, 0) / cells.length;
+    
+    // Calculate level (1-10) and column (1-12)
     const levelId  = Math.min(10, Math.max(1, Math.round(avgRow) + 1));
     const columnId = Math.min(12, Math.max(1, Math.round(avgCol) + 1));
-
-    console.log(`Buying column ${columnId} level ${levelId} with $${betAmount} USDC`);
-    console.log(`Selected ${cells.length} cells`);
+    
+    console.log(`🎯 Buying column ${columnId} level ${levelId} with $${betAmount} USDC`);
+    console.log(`📋 Selected ${cells.length} cells (avgRow: ${avgRow.toFixed(2)}, avgCol: ${avgCol.toFixed(2)})`);
+    console.log(`📍 Cell examples:`, cells.slice(0, 3));
 
     // Step 3: Call buyShares on RushTrade contract
     btn.textContent = `Buying col ${columnId} lvl ${levelId}...`;
@@ -1169,7 +1184,10 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
       account: walletAddress
     });
     
-    const hash = await walletClient.writeContract(request);
+    const hash = await walletClient.writeContract({
+      ...request,
+      type: 'legacy' // Use legacy transactions for Monad
+    });
     console.log('📤 Transaction sent:', hash);
     
     btn.textContent = 'Confirming...';
@@ -1486,7 +1504,7 @@ async function connectWallet() {
 
 // ===== CONTRACT INTEGRATION =====
 const CONTRACTS = {
-  RushTrade: '0xf20d297680cd451910eaa5fc58e73824d09e4688',
+  RushTrade: '0xc1c623CcC9DbB3c097bB65fc7F34f70465a2d4D5',
   USDC: '0x534b2f3A21130d7a60830c2Df862319e593943A3'
 };
 
@@ -1686,11 +1704,10 @@ async function approveUSDC(amount) {
       return true;
     }
     
-    // Convert amount to USDC units (6 decimals)
-    // Approve a larger amount to avoid frequent approvals (approve 10x the bet amount)
-    const amountInUnits = BigInt(Math.floor(amount * 10 * 1e6));
+    // Approve infinite amount to avoid future approvals
+    const amountInUnits = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'); // Max uint256
     
-    console.log('Requesting USDC approval for:', amountInUnits.toString());
+    console.log('Requesting infinite USDC approval');
     
     // Approve RushTrade to spend USDC
     const { request } = await publicClient.simulateContract({
@@ -1701,7 +1718,10 @@ async function approveUSDC(amount) {
       account: walletAddress
     });
     
-    const hash = await walletClient.writeContract(request);
+    const hash = await walletClient.writeContract({
+      ...request,
+      type: 'legacy' // Use legacy transactions for Monad
+    });
     console.log('Approval transaction:', hash);
     
     // Wait for confirmation
