@@ -12,7 +12,7 @@ contract DeployRushTrade is Script {
 
         // Contract addresses
         address usdcAddress = 0x534b2f3A21130d7a60830c2Df862319e593943A3;
-        address pythAddress = 0xA2aa501b19aff244D90cc15a4Cf739D2725B5729; // Pyth on Monad testnet
+        address pythAddress = 0x2880aB155794e7179c9eE2e38200202908C17B43; // Pyth on Monad testnet (from docs)
         bytes32 btcUsdPriceId = 0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43; // BTC/USD
         
         console.log("Using USDC at:", usdcAddress);
