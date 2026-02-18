@@ -142,6 +142,14 @@ contract RushTrade is Ownable, ReentrancyGuard {
 
         Round storage round = rounds[currentRoundId];
         
+        // Check if current round has expired (all columns past)
+        uint256 roundEndTime = round.startTime + ROUND_DURATION;
+        if (block.timestamp >= roundEndTime && round.openPrice != 0) {
+            // Start a new round
+            _startNewRound();
+            round = rounds[currentRoundId];
+        }
+        
         // Auto-start new round if opening price not set
         if (round.openPrice == 0) {
             // Try to get price from Pyth oracle
