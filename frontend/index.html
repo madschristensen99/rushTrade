@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <script type="module">
   // Import viem and wallet client
-  import { createWalletClient, custom, formatEther, createPublicClient, http } from 'https://esm.sh/viem@2.7.15';
+  import { createWalletClient, custom, formatEther, createPublicClient, http, encodeFunctionData } from 'https://esm.sh/viem@2.7.15';
   
   // Define Monad Testnet chain
   const monadTestnet = {
@@ -33,7 +33,7 @@
     testnet: true,
   };
   
-  window.viem = { createWalletClient, custom, formatEther, createPublicClient, http, monadTestnet };
+  window.viem = { createWalletClient, custom, formatEther, createPublicClient, http, monadTestnet, encodeFunctionData };
   window.pythReady = true;
 </script>
 <style>
@@ -1176,17 +1176,23 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
 
     const collateralAmount = BigInt(Math.floor(betAmount * 1e6)); // USDC has 6 decimals
 
-    const { request } = await publicClient.simulateContract({
-      address: CONTRACTS.RushTrade,
+    // Manually encode and send transaction using ethereum.request
+    const { encodeFunctionData } = window.viem;
+    const data = encodeFunctionData({
       abi: RUSHTRADE_ABI,
       functionName: 'buyShares',
-      args: [columnId, levelId, collateralAmount],
-      account: walletAddress
+      args: [columnId, levelId, collateralAmount]
     });
     
-    const hash = await walletClient.writeContract({
-      ...request,
-      type: 'legacy' // Use legacy transactions for Monad
+    const hash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{
+        from: walletAddress,
+        to: CONTRACTS.RushTrade,
+        data: data,
+        gas: '0xC3500', // 800000 in hex
+        gasPrice: '0x1BF08EB000' // 120 gwei in hex
+      }]
     });
     console.log('📤 Transaction sent:', hash);
     
@@ -1709,18 +1715,23 @@ async function approveUSDC(amount) {
     
     console.log('Requesting infinite USDC approval');
     
-    // Approve RushTrade to spend USDC
-    const { request } = await publicClient.simulateContract({
-      address: CONTRACTS.USDC,
+    // Manually encode and send transaction using ethereum.request
+    const { encodeFunctionData } = window.viem;
+    const data = encodeFunctionData({
       abi: ERC20_ABI,
       functionName: 'approve',
-      args: [CONTRACTS.RushTrade, amountInUnits],
-      account: walletAddress
+      args: [CONTRACTS.RushTrade, amountInUnits]
     });
     
-    const hash = await walletClient.writeContract({
-      ...request,
-      type: 'legacy' // Use legacy transactions for Monad
+    const hash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{
+        from: walletAddress,
+        to: CONTRACTS.USDC,
+        data: data,
+        gas: '0x30D40', // 200000 in hex
+        gasPrice: '0x1BF08EB000' // 120 gwei in hex
+      }]
     });
     console.log('Approval transaction:', hash);
     
