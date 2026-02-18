@@ -551,14 +551,14 @@
 <script>
 // ===== CONFIG =====
 const GRID_COLS = 12;
-const GRID_ROWS = 24;
+const GRID_ROWS = 10;
 const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
 const CIRC = 2 * Math.PI * 32;
 const GRID_ZONE_RATIO = 0.55;
 const CHART_PAD_TOP = 10;
 const CHART_PAD_BOTTOM = 10;
 const PRICE_LABEL_WIDTH = 58;
-const BUFFER_SECONDS = 3; // 3-second no-bet buffer
+const BUFFER_SECONDS = 0; // No buffer — all 120 cells open from round start
 
 // Each grid column spans this many seconds
 const SECS_PER_COL = 60 / GRID_COLS; // 5s per column
@@ -607,13 +607,12 @@ function resize() {
   canvas.style.height = r.height + 'px';
 }
 
-// Returns the first column index that is open for betting
+// Returns the first column index that is still open for betting.
+// Column c covers [c*5s, (c+1)*5s). It locks once its window has expired.
+// At t=0 all 12 columns are open; one column locks every 5 seconds.
 function getFirstBettableCol() {
   const elapsed = 60 - timeLeft;
-  const bufferEnd = elapsed + BUFFER_SECONDS;
-  // First column whose START time is >= bufferEnd
-  const col = Math.ceil(bufferEnd / SECS_PER_COL);
-  return Math.min(col, GRID_COLS); // can be GRID_COLS meaning nothing is bettable
+  return Math.min(Math.floor(elapsed / SECS_PER_COL), GRID_COLS);
 }
 
 function isCellLocked(col) {
@@ -1145,25 +1144,28 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
       throw new Error('USDC approval failed');
     }
     
-    // Step 2: Determine which box to buy based on painted cells
-    // For now, we'll use a simple heuristic: pick box based on average cell position
-    // TODO: Let user explicitly choose box in UI
-    const avgCell = Array.from(selectedCells).reduce((sum, cell) => sum + cell, 0) / selectedCells.size;
-    const boxId = Math.min(10, Math.max(1, Math.ceil(avgCell / (TOTAL_CELLS / 10))));
-    
-    console.log(`🎯 Buying shares in Box ${boxId} with $${betAmount} USDC`);
-    console.log(`📋 Selected ${selectedCells.size} cells`);
-    
+    // Step 2: Determine column (1-12) and level (1-10) from the painted cells.
+    // Row 0 (top) = level 1 (most bullish), row 9 (bottom) = level 10 (most bearish).
+    // Col 0 = column 1 (first 5s), col 11 = column 12 (last 5s).
+    const cells = Array.from(selectedCells);
+    const avgRow = cells.reduce((sum, cell) => sum + parseInt(cell.split('-')[0], 10), 0) / cells.length;
+    const avgCol = cells.reduce((sum, cell) => sum + parseInt(cell.split('-')[1], 10), 0) / cells.length;
+    const levelId  = Math.min(10, Math.max(1, Math.round(avgRow) + 1));
+    const columnId = Math.min(12, Math.max(1, Math.round(avgCol) + 1));
+
+    console.log(`Buying column ${columnId} level ${levelId} with $${betAmount} USDC`);
+    console.log(`Selected ${cells.length} cells`);
+
     // Step 3: Call buyShares on RushTrade contract
-    btn.textContent = `Buying Box ${boxId} shares...`;
-    
+    btn.textContent = `Buying col ${columnId} lvl ${levelId}...`;
+
     const collateralAmount = BigInt(Math.floor(betAmount * 1e6)); // USDC has 6 decimals
-    
+
     const { request } = await publicClient.simulateContract({
       address: CONTRACTS.RushTrade,
       abi: RUSHTRADE_ABI,
       functionName: 'buyShares',
-      args: [boxId, collateralAmount],
+      args: [columnId, levelId, collateralAmount],
       account: walletAddress
     });
     
@@ -1181,7 +1183,8 @@ document.getElementById('placeBtn').addEventListener('click', async function() {
     activeBets.push({
       cells: new Set(selectedCells),
       amount: betAmount,
-      boxId: boxId,
+      columnId: columnId,
+      levelId: levelId,
       hitCells: new Set(),
       profitTicks: 0,
       txHash: hash
@@ -1548,7 +1551,8 @@ const ERC20_ABI = [
 const RUSHTRADE_ABI = [
   {
     "inputs": [
-      {"name": "boxId", "type": "uint8"},
+      {"name": "columnId", "type": "uint8"},
+      {"name": "levelId",  "type": "uint8"},
       {"name": "collateralAmount", "type": "uint256"}
     ],
     "name": "buyShares",
@@ -1561,13 +1565,9 @@ const RUSHTRADE_ABI = [
     "name": "getRound",
     "outputs": [{
       "components": [
-        {"name": "roundId", "type": "uint256"},
+        {"name": "roundId",   "type": "uint256"},
         {"name": "startTime", "type": "uint256"},
-        {"name": "endTime", "type": "uint256"},
-        {"name": "openPrice", "type": "int256"},
-        {"name": "closePrice", "type": "int256"},
-        {"name": "winningBox", "type": "uint8"},
-        {"name": "settled", "type": "bool"}
+        {"name": "openPrice", "type": "int256"}
       ],
       "name": "",
       "type": "tuple"
@@ -1580,13 +1580,27 @@ const RUSHTRADE_ABI = [
     "name": "getCurrentRound",
     "outputs": [{
       "components": [
-        {"name": "roundId", "type": "uint256"},
+        {"name": "roundId",   "type": "uint256"},
         {"name": "startTime", "type": "uint256"},
-        {"name": "endTime", "type": "uint256"},
-        {"name": "openPrice", "type": "int256"},
-        {"name": "closePrice", "type": "int256"},
-        {"name": "winningBox", "type": "uint8"},
-        {"name": "settled", "type": "bool"}
+        {"name": "openPrice", "type": "int256"}
+      ],
+      "name": "",
+      "type": "tuple"
+    }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {"name": "roundId",  "type": "uint256"},
+      {"name": "columnId", "type": "uint8"}
+    ],
+    "name": "getColumn",
+    "outputs": [{
+      "components": [
+        {"name": "settled",      "type": "bool"},
+        {"name": "closePrice",   "type": "int256"},
+        {"name": "winningLevel", "type": "uint8"}
       ],
       "name": "",
       "type": "tuple"
